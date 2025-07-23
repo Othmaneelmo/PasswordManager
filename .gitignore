@@ -1,0 +1,14 @@
+# Ignore compiled class files
+*.class
+
+# Ignore IDE config files
+.vscode/
+.idea/
+*.iml
+
+# Ignore OS files
+.DS_Store
+
+# Ignore secrets or vault files
+vault.enc
+*.secret
