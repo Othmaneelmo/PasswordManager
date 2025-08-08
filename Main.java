@@ -42,11 +42,17 @@ public class Main {
     byte[] masterKeyBytes = new String(masterKeyChars).getBytes();
     Arrays.fill(masterKeyChars, ' ');
 
-    MessageDigest digest = MessageDigest.getInstance("SHA-256");
-    byte[] hashedKey = digest.digest(masterKeyBytes);
-    Arrays.fill(masterKeyBytes, (byte) 0);
+    try {
+      MessageDigest digest = MessageDigest.getInstance("SHA-256");
+      byte[] hashedKey = digest.digest(masterKeyBytes);
+      Arrays.fill(masterKeyBytes, (byte) 0);
+      
+    } catch (NoSuchAlgorithmException e) {
+      System.out.println("SHA-256 algorithm not available. Exiting...");
+      Arrays.fill(masterKeyChars, ' ');  // Clear password on error too
+      return;
+    }
 
 
-    System.out.println("Your master key is : " + masterKey);
   }
 }
