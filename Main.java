@@ -9,6 +9,7 @@
  */
 
 import java.io.Console;
+import java.util.Arrays;
 
 public class Main {
   public static void main(String[] args) {
@@ -25,9 +26,16 @@ public class Main {
     Using console and not scanner because:
         -Scanner shows password when typed
     */
-    char[] passwordsChars = console.readPassword("Create a Master key: ");
+    char[] masterKeyChars = console.readPassword("Create a Master key: ");
+
+    //Simple length validation for passoword (>8), NEEDS UPGRADE
+    if (masterKeyChars.length < 8) {
+      System.out.println("Password too short. Must be at least 8 characters.");
+      Arrays.fill(masterKeyChars, ' '); //clear array
+    return;
+    }
     String masterKey =
-        new String(passwordsChars); // replace later (it also makes a String out
+        new String(masterKeyChars); // replace later (it also makes a String out
                                     // of the password)
 
     System.out.println("Your master key is : " + masterKey);
