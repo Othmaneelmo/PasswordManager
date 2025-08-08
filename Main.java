@@ -9,6 +9,8 @@
  */
 
 import java.io.Console;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 public class Main {
@@ -34,9 +36,16 @@ public class Main {
       Arrays.fill(masterKeyChars, ' '); //clear array
     return;
     }
-    String masterKey =
-        new String(masterKeyChars); // replace later (it also makes a String out
-                                    // of the password)
+
+    //Converting Masterkey char[] to byte[] (for MessageDigest API)
+    /*we still convert Master key to String, we need to figure out a way to do it more safely */
+    byte[] masterKeyBytes = new String(masterKeyChars).getBytes();
+    Arrays.fill(masterKeyChars, ' ');
+
+    MessageDigest digest = MessageDigest.getInstance("SHA-256");
+    byte[] hashedKey = digest.digest(masterKeyBytes);
+    Arrays.fill(masterKeyBytes, (byte) 0);
+
 
     System.out.println("Your master key is : " + masterKey);
   }
