@@ -1,3 +1,13 @@
+/*TODO
+ * 1. Avoid converting the password to a String — Keep it as a char[] to improve security.
+ * 2. Clear the password array after use to avoid it lingering in memory.
+ * 3. Add password validation (e.g., length, complexity).
+ * 4. Use the master key for something meaningful, like encryption or authentication.
+ * 5. Implement functionality to store or verify the master key safely.
+ * 6. Handle exceptions and edge cases gracefully.
+ * 
+ */
+
 import java.io.Console;
 
 public class Main {
