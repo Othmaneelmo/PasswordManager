@@ -38,8 +38,13 @@ public class Main {
     }
 
     //Converting Masterkey char[] to byte[] (for MessageDigest API)
-    /*we still convert Master key to String, we need to figure out a way to do it more safely */
-    byte[] masterKeyBytes = new String(masterKeyChars).getBytes();
+    // Convert char[] to byte[] manually (2 bytes per char)
+    byte[] masterKeyBytes = new byte[masterKeyChars.length * 2];
+    for (int i = 0; i < masterKeyChars.length; i++) {
+        masterKeyBytes[i * 2] = (byte) (masterKeyChars[i] >> 8);
+        masterKeyBytes[i * 2 + 1] = (byte) masterKeyChars[i];
+    }
+    // Clear char[] asap
     Arrays.fill(masterKeyChars, ' ');
 
     try {
