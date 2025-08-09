@@ -46,10 +46,10 @@ public class Main {
     }
     // Clear char[] asap
     Arrays.fill(masterKeyChars, ' ');
-
+    byte[] hashedKey = null; // declare outside try
     try {
       MessageDigest digest = MessageDigest.getInstance("SHA-256");
-      byte[] hashedKey = digest.digest(masterKeyBytes);
+      hashedKey = digest.digest(masterKeyBytes);
       Arrays.fill(masterKeyBytes, (byte) 0);
       
     } catch (NoSuchAlgorithmException e) {
@@ -57,7 +57,22 @@ public class Main {
       Arrays.fill(masterKeyChars, ' ');  // Clear password on error too
       return;
     }
-
-
+    //to print the hashed MasterKey
+    /*if (hashedKey != null) {
+      System.out.println(bytesToHex(hashedKey));
+    }
+    */
   }
+
+
+//to Print the hashed MasterKey
+  /*
+  private static String bytesToHex(byte[] bytes) {
+    StringBuilder sb = new StringBuilder();
+    for (byte b : bytes) {
+      sb.append(String.format("%02x", b));
+    }
+    return sb.toString();
+  }
+ */
 }
