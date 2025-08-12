@@ -12,6 +12,9 @@ import java.io.Console;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.List;
+import java.util.list;
+import java.util.ArrayList;
 
 public class Main {
   public static void main(String[] args) {
@@ -35,6 +38,19 @@ public class Main {
       System.out.println("Password too short. Must be at least 8 characters.");
       Arrays.fill(masterKeyChars, ' '); //clear array
     return;
+    }
+
+    /* UPGRADE: advanced password validation (keeps char[]; no String)
+     * - At least 12 chars (additive to the 8+ check above)
+     * - At least 3 of 4 classes: lower / upper / digit / symbol
+     * - No String allocations for the password (security)
+     */
+    PasswordValidator.ValidationResult vr = PasswordValidator.validate(masterKeyChars);
+    if (!vr.ok()) {
+      System.out.println("Password not strong enough:");
+      for (String msg : vr.messages()) System.out.println(" - " + msg);
+      Arrays.fill(masterKeyChars, ' '); // clear array before exiting
+      return;
     }
 
     //Converting Masterkey char[] to byte[] (for MessageDigest API)
@@ -61,5 +77,49 @@ public class Main {
     }
     
   }
+      /* ---------------- Password Validator (incremental, no Strings) ----------------
+     * Phase 1 (this commit): min length + character classes.
+     * More checks will be added in later commits without changing existing code.
+     */
+    static final class PasswordValidator {
+      private static final int MIN_LENGTH = 12; // additive to your 8+ precheck
+
+      static ValidationResult validate(char[] pwd) {
+        List<String> reasons = new ArrayList<>();
+        if (pwd == null || pwd.length == 0) {
+          reasons.add("cannot be empty");
+          return new ValidationResult(false, reasons);
+        }
+
+        // length
+        if (pwd.length < MIN_LENGTH) {
+          reasons.add("must be at least " + MIN_LENGTH + " characters long");
+        }
+
+        // character classes
+        boolean hasLower = false, hasUpper = false, hasDigit = false, hasSymbol = false;
+        for (char c : pwd) {
+          if (c >= 'a' && c <= 'z') hasLower = true;
+          else if (c >= 'A' && c <= 'Z') hasUpper = true;
+          else if (c >= '0' && c <= '9') hasDigit = true;
+          else hasSymbol = true;
+        }
+        int classes = (hasLower?1:0) + (hasUpper?1:0) + (hasDigit?1:0) + (hasSymbol?1:0);
+        if (classes < 3) {
+          reasons.add("must include at least 3 of: lowercase, uppercase, digit, symbol");
+        }
+
+        return new ValidationResult(reasons.isEmpty(), reasons);
+      }
+
+      /* Simple container so we can add more detail later */
+      static final class ValidationResult {
+        private final boolean ok;
+        private final List<String> messages;
+        ValidationResult(boolean ok, List<String> messages) { this.ok = ok; this.messages = messages; }
+        boolean ok() { return ok; }
+        List<String> messages() { return messages; }
+      }
+    }
 }
 /*this is a test for the commits you see */
