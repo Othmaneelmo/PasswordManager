@@ -13,7 +13,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.list;
 import java.util.ArrayList;
 
 public class Main {
@@ -107,6 +106,27 @@ public class Main {
         int classes = (hasLower?1:0) + (hasUpper?1:0) + (hasDigit?1:0) + (hasSymbol?1:0);
         if (classes < 3) {
           reasons.add("must include at least 3 of: lowercase, uppercase, digit, symbol");
+        }
+        
+        // whitespace / control characters + leading/trailing spaces
+        if (Character.isWhitespace(pwd[0]) || Character.isWhitespace(pwd[pwd.length - 1])) {
+          reasons.add("cannot start or end with whitespace");
+        }
+        for (char c : pwd) {
+          if (Character.isWhitespace(c) || Character.isISOControl(c)) {
+            reasons.add("cannot contain whitespace or control characters");
+            break;
+          }
+        }
+
+        // no more than 2 identical characters in a row
+        int run = 1;
+        for (int i = 1; i < pwd.length; i++) {
+          run = (pwd[i] == pwd[i - 1]) ? run + 1 : 1;
+          if (run > 2) {
+            reasons.add("cannot have more than 2 identical characters in a row");
+            break;
+          }
         }
 
         return new ValidationResult(reasons.isEmpty(), reasons);
