@@ -83,6 +83,37 @@ public class Main {
     static final class PasswordValidator {
       private static final int MIN_LENGTH = 12; // additive to your 8+ precheck
 
+            private static int countUniquesAsciiBuckets(char[] pwd) {
+        boolean[] seen = new boolean[256]; // small, avoids allocations of Collections
+        int u = 0;
+        for (char c : pwd) {
+          int idx = (c & 0xFF);
+          if (!seen[idx]) { seen[idx] = true; u++; }
+        }
+        return u;
+      }
+
+      private static boolean hasSimpleAscendingSequence(char[] pwd, int win) {
+        if (pwd.length < win) return false;
+        // Work on a lowercased copy to be case-insensitive
+        char[] lc = Arrays.copyOf(pwd, pwd.length);
+        for (int i = 0; i < lc.length; i++) lc[i] = Character.toLowerCase(lc[i]);
+
+        boolean hit = false;
+        int streak = 1;
+        for (int i = 1; i < lc.length; i++) {
+          if (lc[i] == lc[i - 1] + 1) {
+            streak++;
+            if (streak >= win) { hit = true; break; }
+          } else {
+            streak = 1;
+          }
+        }
+        // zeroize the temp copy
+        Arrays.fill(lc, '\0');
+        return hit;
+      }
+
       static ValidationResult validate(char[] pwd) {
         List<String> reasons = new ArrayList<>();
         if (pwd == null || pwd.length == 0) {
@@ -127,6 +158,17 @@ public class Main {
             reasons.add("cannot have more than 2 identical characters in a row");
             break;
           }
+        }
+
+        // uniqueness
+        int unique = countUniquesAsciiBuckets(pwd);
+        if (unique < 5) {
+          reasons.add("must contain at least 5 different characters");
+        }
+
+        // simple sequences like abcd or 1234 (length >= 4)
+        if (hasSimpleAscendingSequence(pwd, 4)) {
+          reasons.add("cannot contain simple ascending sequences of length 4 or more");
         }
 
         return new ValidationResult(reasons.isEmpty(), reasons);
