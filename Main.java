@@ -83,6 +83,24 @@ public class Main {
     static final class PasswordValidator {
       private static final int MIN_LENGTH = 12; // additive to your 8+ precheck
 
+      // Very small built-in blacklist; later you can swap for a file-based list.
+      private static final char[][] BLACKLIST = new char[][]{
+        "password".toCharArray(),
+        "qwerty".toCharArray(),
+        "letmein".toCharArray(),
+        "welcome".toCharArray(),
+        "admin".toCharArray(),
+        "12345678".toCharArray()
+      };
+
+      private static boolean equalsIgnoreCase(char[] a, char[] b) {
+        if (a.length != b.length) return false;
+        for (int i = 0; i < a.length; i++) {
+          if (Character.toLowerCase(a[i]) != Character.toLowerCase(b[i])) return false;
+        }
+        return true;
+      }
+
             private static int countUniquesAsciiBuckets(char[] pwd) {
         boolean[] seen = new boolean[256]; // small, avoids allocations of Collections
         int u = 0;
@@ -169,6 +187,14 @@ public class Main {
         // simple sequences like abcd or 1234 (length >= 4)
         if (hasSimpleAscendingSequence(pwd, 4)) {
           reasons.add("cannot contain simple ascending sequences of length 4 or more");
+        }
+
+        // blacklist (case-insensitive, without creating Strings)
+        for (char[] bad : BLACKLIST) {
+          if (equalsIgnoreCase(pwd, bad)) {
+            reasons.add("is too common (appears on common-password lists)");
+            break;
+          }
         }
 
         return new ValidationResult(reasons.isEmpty(), reasons);
