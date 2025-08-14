@@ -32,8 +32,8 @@ public class Main {
 
 
     /* UPGRADE: advanced password validation (keeps char[]; no String)
-     * - At least 12 chars (additive to the 8+ check above)
-     * - At least 3 of 4 classes: lower / upper / digit / symbol
+     * - At least 12 chars 
+     * - Must contain at least 3 of the 4 : lowerCase / upperCase / digit / symbol
      * - No String allocations for the password (security)
      */
     ValidationResult vr = PasswordValidator.validate(masterKeyChars);
@@ -68,5 +68,4 @@ public class Main {
     }
     
   }
-
 }
