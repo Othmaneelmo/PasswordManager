@@ -175,7 +175,9 @@ import java.util.List;
             break;
           }
         }//i dont understand why not allow whitespace in middle of password
-/*  //WHAT THE FUCK IS THIS, 
+
+/*  
+//WHAT THE FUCK IS THIS, 
     //maybe stop user from inputing password made of only 3 identical characters or sum (aaabbbccc),
     // but "thisisAgOOdPassword123@" wouldnt work because of "OO" and "ss"
 

@@ -31,11 +31,15 @@ public class Main {
     char[] masterKeyChars = console.readPassword("Create a Master key: ");
 
 
-    /* UPGRADE: advanced password validation (keeps char[]; no String)
-     * - At least 12 chars 
-     * - Must contain at least 3 of the 4 : lowerCase / upperCase / digit / symbol
-     * - No String allocations for the password (security)
-     */
+//PASSWORD VALIDATION:
+/* this prints out whether the inputted password was valid or not, with a list of reason why not:
+
+ * it takes masterKeyChars (char[]) as a parameter, 
+ * PasswordValidator.validate() method checks for password complexity, and add reason X if rule Y is not respected
+ * PasswordValidator.validate() method returns ValidationResult(reasons.isEmpty(), reasons)
+ * the latter ValidationResult() returns whether the passowrd is valid (boolean ok), and the reasons (List<String> messages)
+ * from the above return statements, this code section below prints appropriate messages(according to the return stats), AND CLEARS THE INVALID PASSWORD (char[])
+*/
     ValidationResult vr = PasswordValidator.validate(masterKeyChars);
     if (!vr.ok()) {
       System.out.println("Password not strong enough:");
