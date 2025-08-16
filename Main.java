@@ -99,14 +99,6 @@ public class Main {
       return;
     }
 
-    // Convert char[] to byte[] manually (2 bytes per char) (UTF-16 encoding)
-    byte[] masterKeyBytes = new byte[masterKeyChars.length * 2];
-    for (int i = 0; i < masterKeyChars.length; i++) {
-        masterKeyBytes[i * 2] = (byte) (masterKeyChars[i] >> 8); //high byte
-        masterKeyBytes[i * 2 + 1] = (byte) masterKeyChars[i]; //low byte
-    }
-    Arrays.fill(masterKeyChars, ' ');    // Clear char[] asap
-
     // --- PBKDF2 placeholders ---
     SecureRandom random = new SecureRandom();
     byte[] salt = new byte[16]; // 16 bytes = 128 bits
