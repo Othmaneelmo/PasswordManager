@@ -3,8 +3,7 @@
  * 1. Avoid converting the password to a String — Keep it as a char[] to improve security.
  * 2. Clear the password array after use to avoid it lingering in memory.
 */
-/*
- * TODO (Project Security Plan):
+/* TODO (Project Security Plan):
  *
  * 1. Replace plain SHA-256 with PBKDF2:
  *    - Use javax.crypto.SecretKeyFactory with "PBKDF2WithHmacSHA256".
@@ -56,12 +55,12 @@
 import java.io.Console;
 import java.security.SecureRandom;
 import java.util.Arrays;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 /*
 --- PBKDF2 imports added ---
 import java.security.SecureRandom;
 import java.security.spec.KeySpec;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
  */
 
 public class Main {
@@ -82,7 +81,8 @@ public class Main {
 
 
 //PASSWORD VALIDATION:
-/* This prints out whether the inputted password was valid or not, with a list of reason why not:
+/* 
+ * This prints out whether the inputted password was valid or not, with a list of reason why not:
  *  - it takes masterKeyChars (char[]) as a parameter, 
  *  - PasswordValidator.validate() method checks for password complexity, and add reason X if rule Y is not respected
  *  - PasswordValidator.validate() method returns ValidationResult(reasons.isEmpty(), reasons)
@@ -99,7 +99,6 @@ public class Main {
       return;
     }
 
-    //Converting Masterkey char[] to byte[] (for MessageDigest API)
     // Convert char[] to byte[] manually (2 bytes per char) (UTF-16 encoding)
     byte[] masterKeyBytes = new byte[masterKeyChars.length * 2];
     for (int i = 0; i < masterKeyChars.length; i++) {
@@ -114,6 +113,28 @@ public class Main {
     random.nextBytes(salt);
     int iterations = 600_000;   // high iteration count
     int keyLength = 256;        // key length in bit
-    // TODO: replace SHA-256 with PBKDF2 logic here
+      
+    try {
+        // Create PBEKeySpec with char[] password, salt, iterations, key length
+        PBEKeySpec spec = new PBEKeySpec(masterKeyChars, salt, iterations, keyLength);
+
+        // Clear masterKeyChars immediately after creating the spec
+        Arrays.fill(masterKeyChars, ' ');
+
+        // Generate the PBKDF2 hash
+        SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+        byte[] hash = skf.generateSecret(spec).getEncoded();
+
+        // Clear the password inside PBEKeySpec
+        spec.clearPassword();
+      
+        // TODO: store hash + salt + iterations securely
+        System.out.println("PBKDF2 hash generated successfully!");
+    } catch (Exception e) {
+        System.out.println("Error generating PBKDF2 hash: " + e.getMessage());
+        Arrays.fill(masterKeyChars, ' '); // just in case
+        return;
+    }
+
   }
 }
