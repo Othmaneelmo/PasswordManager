@@ -54,8 +54,6 @@
 
 
 import java.io.Console;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 public class Main {
@@ -102,16 +100,6 @@ public class Main {
     }
     Arrays.fill(masterKeyChars, ' ');    // Clear char[] asap
 
-    byte[] hashedKey = null; // declare outside try, (not used but could be for testing purposes or future uses)
-    try {
-      MessageDigest digest = MessageDigest.getInstance("SHA-256");
-      hashedKey = digest.digest(masterKeyBytes);
-      Arrays.fill(masterKeyBytes, (byte) 0);    
-    } catch (NoSuchAlgorithmException e) {
-      System.out.println("SHA-256 algorithm not available. Exiting...");
-      Arrays.fill(masterKeyChars, ' ');  // Clear password on error too
-      return;
-    }
     
   }
 }
