@@ -54,7 +54,15 @@
 
 
 import java.io.Console;
+import java.security.SecureRandom;
 import java.util.Arrays;
+/*
+--- PBKDF2 imports added ---
+import java.security.SecureRandom;
+import java.security.spec.KeySpec;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+ */
 
 public class Main {
   public static void main(String[] args) {
@@ -100,6 +108,12 @@ public class Main {
     }
     Arrays.fill(masterKeyChars, ' ');    // Clear char[] asap
 
-    
+    // --- PBKDF2 placeholders ---
+    SecureRandom random = new SecureRandom();
+    byte[] salt = new byte[16]; // 16 bytes = 128 bits
+    random.nextBytes(salt);
+    int iterations = 600_000;   // high iteration count
+    int keyLength = 256;        // key length in bit
+    // TODO: replace SHA-256 with PBKDF2 logic here
   }
 }
