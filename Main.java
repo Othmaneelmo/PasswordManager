@@ -1,12 +1,57 @@
-/*TODO
+
+/* KEEP IN MIND
  * 1. Avoid converting the password to a String — Keep it as a char[] to improve security.
  * 2. Clear the password array after use to avoid it lingering in memory.
- * 3. Add password validation (e.g., length, complexity).
- * 4. Use the master key for something meaningful, like encryption or authentication.
- * 5. Implement functionality to store or verify the master key safely.
- * 6. Handle exceptions and edge cases gracefully.
- * 
+*/
+/*
+ * TODO (Project Security Plan):
+ *
+ * 1. Replace plain SHA-256 with PBKDF2:
+ *    - Use javax.crypto.SecretKeyFactory with "PBKDF2WithHmacSHA256".
+ *    - Use a random salt (16–32 bytes) for each password.
+ *    - Use a high iteration count (e.g., ~600,000) for better security.
+ *    - Store: hash + salt + iteration count.
+ *    - Use SecureRandom for generating salts.
+ *
+ * 2. Implement password verification:
+ *    - On login, load salt + iteration count + hash from storage.
+ *    - Run PBKDF2 with the same parameters on the entered password.
+ *    - Compare results securely (constant-time).
+ *    - Keep derived encryption key only in memory after unlock.
+ *
+ * 3. Update storage format:
+ *    - Save hash, salt, iteration count per master key.
+ *    - Store encrypted account passwords (AES-GCM recommended) with IVs.
+ *    - Consider a formatVersion/algorithmVersion field for future upgrades.
+ *
+ * 4. Add CLI menu (top-level interface):
+ *        [1] Set/Reset Master Key       # Create or change the vault's master key
+ *        [2] Unlock Vault               # Authenticate to access stored passwords
+ *        [3] Add Account Password       # Store account name + password (encrypted)
+ *        [4] List Accounts              # Show saved account names (but not passwords)
+ *        [5] Retrieve Account Password  # Decrypt & show password for chosen account
+ *        [6] Encrypt a File             # Bonus: encrypt file with derived key
+ *        [7] Decrypt a File             # Bonus: decrypt file with derived key
+ *        [0] Exit
+ *
+ * 5. Project structure / utilities:
+ *    - Keep crypto logic in separate classes (PasswordHasher, VaultStorage, CryptoUtils).
+ *    - Plan storage location (file, JSON, or SQLite) for hashes + encrypted data.
+ *    - Ensure secure random generation for salts, IVs, etc.
+ *
+ * 6. Testing:
+ *    - Verify password hashing and verification.
+ *    - Verify encryption/decryption of account passwords and files.
+ *    - Test edge cases (empty/long passwords, invalid input).
+ *    - Ensure login/unlock is reasonably fast (< 1 second).
+ *
+ * 7. Logging / safety:
+ *    - Do not log sensitive data (plaintext passwords, keys, hashes).
+ *    - Use logging only for general program flow/debug info.
+ *
+ * Note: PBKDF2 is secure enough for this learning project. No need to add Argon2 or other KDFs.
  */
+
 
 import java.io.Console;
 import java.security.MessageDigest;
