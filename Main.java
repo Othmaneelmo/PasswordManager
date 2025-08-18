@@ -57,6 +57,7 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+import java.util.Base64;
 /*
 --- PBKDF2 imports added ---
 import java.security.SecureRandom;
@@ -103,6 +104,8 @@ public class Main {
     SecureRandom random = new SecureRandom();
     byte[] salt = new byte[16]; // 16 bytes = 128 bits
     random.nextBytes(salt);
+    // Encode salt in Base64 for storage
+    String encodedSalt = Base64.getEncoder().encodeToString(salt);
     int iterations = 600_000;   // high iteration count
     int keyLength = 256;        // key length in bit
       
