@@ -39,3 +39,22 @@ public class Main {
     System.out.println("Your master key is : " + masterKey);
   }
 }
+```
+
+## Program Description
+
+This Java program securely reads a master key from the user by leveraging the `Console` class’s `readPassword()` method, which prevents password characters from being echoed on the screen during input — unlike `Scanner`, which shows typed characters and is less secure for passwords.  
+
+The password is initially read as a `char[]` array to allow explicit clearing from memory, since `String` objects in Java are immutable and can linger in memory, posing a security risk if exposed through memory dumps.  
+
+Although the code temporarily converts the `char[]` to a `String` for ease of use and demonstration, this is flagged as a **security trade-off** to be addressed later, as storing passwords in immutable `String` form should be avoided.  
+
+The program also checks that a console is available before proceeding, since `System.console()` returns `null` in environments without a proper terminal, ensuring graceful failure.  
+
+Finally, for testing purposes, it prints the entered master key — which in a production environment should be removed to maintain password confidentiality.  
+
+---
+
+## Next Steps
+
+Now what we need to work on is the following:
