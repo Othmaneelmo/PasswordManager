@@ -150,3 +150,43 @@ While if UTF-8 encoding had been used, the output would have been:
 * Decimal form: `[65, 66, 67]`
 * Hex form: `[0x41, 0x42, 0x43]`
 
+### 3- Exception Handling for MessageDigest.getInstance()
+
+Trying to run the code at this stage causes the following compilation error:  
+**`NoSuchAlgorithmException`** — this is thrown when a particular cryptographic algorithm is requested but not available in the environment.
+
+To fix this, `MessageDigest.getInstance()` must be placed inside a **try-catch block**:
+
+```java
+byte[] hashedKey = null; // declare outside try
+try {
+  MessageDigest digest = MessageDigest.getInstance("SHA-256");
+  hashedKey = digest.digest(masterKeyBytes);
+  Arrays.fill(masterKeyBytes, (byte) 0);
+
+} catch (NoSuchAlgorithmException e) {
+  System.out.println("SHA-256 algorithm not available. Exiting...");
+  Arrays.fill(masterKeyChars, ' ');  // Clear password on error too
+  return;
+}
+````
+
+For testing purposes, this section allows us to see the hashed master key as output:
+
+```java
+// to print the hashed MasterKey
+if (hashedKey != null) {
+  System.out.println(bytesToHex(hashedKey));
+}
+
+// Helper method
+private static String bytesToHex(byte[] bytes) {
+  StringBuilder sb = new StringBuilder();
+  for (byte b : bytes) {
+    sb.append(String.format("%02x", b));
+  }
+  return sb.toString();
+}
+```
+
+
