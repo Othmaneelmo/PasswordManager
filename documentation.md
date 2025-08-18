@@ -262,3 +262,44 @@ Observation: Both options are costly for hackers to brute-force, with Argon2 bei
 **Note:** PBKDF2 is secure enough for this learning project. No need to add Argon2 or other KDFs.
 
 
+
+### Let's start with 1: Replace plain SHA-256 with PBKDF2
+
+We no longer use SHA-256 via `MessageDigest`, so we remove the following imports:
+
+```java
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+````
+
+And we remove the previous SHA-256 block:
+
+```java
+byte[] hashedKey = null; // declare outside try, (not used but could be for testing purposes or future uses)
+try {
+  MessageDigest digest = MessageDigest.getInstance("SHA-256");
+  hashedKey = digest.digest(masterKeyBytes);
+  Arrays.fill(masterKeyBytes, (byte) 0);    
+} catch (NoSuchAlgorithmException e) {
+  System.out.println("SHA-256 algorithm not available. Exiting...");
+  Arrays.fill(masterKeyChars, ' ');  // Clear password on error too
+  return;
+}
+```
+
+We also remove the manual char\[] → byte\[] conversion, since PBKDF2 works directly with `char[]`:
+
+```java
+// Convert char[] to byte[] manually (2 bytes per char) (UTF-16 encoding)
+byte[] masterKeyBytes = new byte[masterKeyChars.length * 2];
+for (int i = 0; i < masterKeyChars.length; i++) {
+    masterKeyBytes[i * 2] = (byte) (masterKeyChars[i] >> 8); //high byte
+    masterKeyBytes[i * 2 + 1] = (byte) masterKeyChars[i]; //low byte
+}
+Arrays.fill(masterKeyChars, ' ');    // Clear char[] asap
+```
+
+Now we are ready to add **PBKDF2**.
+
+
+
