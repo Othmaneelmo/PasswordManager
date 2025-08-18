@@ -122,8 +122,20 @@ public class Main {
 
         // Clear the password inside PBEKeySpec
         spec.clearPassword();
+        // Encode hash in Base64 for storage
+        String encodedHash = Base64.getEncoder().encodeToString(hash);
+
+
+        // Store as algorithm:iterations:salt:hash
+        String stored = "PBKDF2WithHmacSHA256" + ":" 
+                      + iterations + ":" 
+                      + encodedSalt + ":" 
+                      + encodedHash;
+
+        System.out.println("PBKDF2 hash generated and stored:");
+        System.out.println(stored);
       
-        // TODO: store hash + salt + iterations securely
+        // TODO: store hash + encodedsalt + iterations securely
         System.out.println("PBKDF2 hash generated successfully!");
     } catch (Exception e) {
         System.out.println("Error generating PBKDF2 hash: " + e.getMessage());
