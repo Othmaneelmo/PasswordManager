@@ -55,14 +55,9 @@
 import java.io.Console;
 import java.security.SecureRandom;
 import java.util.Arrays;
+import java.util.Base64;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-import java.util.Base64;
-/*
---- PBKDF2 imports added ---
-import java.security.SecureRandom;
-import java.security.spec.KeySpec;
- */
 
 public class Main {
   public static void main(String[] args) {
