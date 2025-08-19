@@ -1,4 +1,6 @@
-# Hello
+## below paragraphs should be removed/documented
+## Need to document PasswordValidator / ValidationResult
+### Hello
 
 ## Improvements / Recommendations
 1. Avoid converting the password to a `String` — keep it as a `char[]` to improve security.
@@ -33,8 +35,7 @@ public class Main {
     */
     char[] masterKeyChars = console.readPassword("Create a Master key: ");
     String masterKey =
-        new String(masterKeyChars); // replace later (it also makes a String out
-                                    // of the password)
+        new String(masterKeyChars); // replace later (the String conversion is only for demonstration, will be removed later)
 
     System.out.println("Your master key is : " + masterKey);
   }
