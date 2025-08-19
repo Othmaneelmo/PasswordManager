@@ -96,9 +96,9 @@ public class Main {
     }
 
     // --- PBKDF2 placeholders ---
-    SecureRandom random = new SecureRandom();
+    SecureRandom saltGenerator = new SecureRandom();
     byte[] salt = new byte[16]; // 16 bytes = 128 bits
-    random.nextBytes(salt);
+    saltGenerator.nextBytes(salt);
     // Encode salt in Base64 for storage
     String encodedSalt = Base64.getEncoder().encodeToString(salt);
     int iterations = 600_000;   // high iteration count
