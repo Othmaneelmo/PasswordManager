@@ -3,7 +3,7 @@
     Need to document PasswordValidator / ValidationResult
     Need to add a table of content
 
-    
+
 # Introduction:
 This project is to build a secure password manager in Java. The main goal is not only to write working code but to understand the security reasoning behind every design choice. 
 
@@ -11,25 +11,18 @@ Password managers are security-critical software: they protect sensitive informa
 
 That’s why this documentation is more than just code comments — it serves three purposes:
 
-#### 1. Code Walkthrough
+**1. Code Walkthrough :**
 Each commit and code snippet is explained with why it exists and what security problem it solves. This way, a beginner can follow the development process step by step.
-#### 2. Design Notes
+
+**2. Design Notes :**
 Important security trade-offs (e.g., char[] vs String, PBKDF2 vs SHA-256) are recorded so that future maintainers — or learners reading this later — understand the reasoning behind the decisions.
-#### 3. Reference Guide: 
+
+**3. Reference Guide :** 
 As the project grows, this document becomes a source of truth for how passwords are processed, hashed, and stored, as well as how the vault’s encryption and command-line interface (CLI) work. This improves maintainability and helps avoid repeating mistakes.
-
-
-## Improvements / Recommendations
-1. Avoid converting the password to a `String` — keep it as a `char[]` to improve security.
-2. Clear the password array after use to avoid it lingering in memory.
-3. Add password validation (e.g., length, complexity).
-4. Use the master key for something meaningful, like encryption or authentication.
-5. Implement functionality to store or verify the master key safely.
-6. Handle exceptions and edge cases gracefully.
 
 ---
 
-## Project Setup
+### Project Setup
 Let us start with setting up the project.
 We create the main class and method. Always start from a working baseline, even if it just prints something.
 ```java
@@ -41,7 +34,100 @@ public class Main {
 ````
 
 
-# below code should be documented. 
+---
+
+### Detect system console
+
+```java
+import java.io.Console;
+
+public class Main {
+  public static void main(String[] args) {
+    Console console = System.console();
+
+    if (console == null) {
+      System.out.println("console not working, use a terminal!");
+      return;
+    }
+
+    System.out.println("Console is available.");
+  }
+}
+```
+This adds console detection with fallback
+
+**Explanation:**
+
+* Java’s `System.console()` allows secure password entry.
+* If run inside an IDE (like IntelliJ or VSCode), `console` might be `null`.
+* We handle this gracefully by showing a message and exiting.
+
+---
+
+### Capture password as char\[]
+
+```java
+import java.io.Console;
+
+public class Main {
+  public static void main(String[] args) {
+    Console console = System.console();
+
+    if (console == null) {
+      System.out.println("console not working, use a terminal!");
+      return;
+    }
+
+    char[] masterKeyChars = console.readPassword("Create a Master key: ");
+    System.out.println("Password captured (hidden while typing).");
+  }
+}
+```
+
+This securely capture password input as char[]
+
+**Explanation:**
+
+* `readPassword()` hides typed characters (unlike `Scanner`).
+* Passwords are stored as `char[]` instead of `String` so we can erase them from memory later.
+* At this stage, we just confirm capture (without printing it).
+
+---
+
+### Temporary String conversion for demo
+
+```java
+import java.io.Console;
+
+public class Main {
+  public static void main(String[] args) {
+    Console console = System.console();
+
+    if (console == null) {
+      System.out.println("console not working, use a terminal!");
+      return;
+    }
+
+    char[] masterKeyChars = console.readPassword("Create a Master key: ");
+    String masterKey =
+        new String(masterKeyChars); // insecure, demo only
+
+    System.out.println("Your master key is : " + masterKey);
+  }
+}
+```
+This prints password by converting char[] to String (demo only)
+
+**Explanation:**
+
+* For testing, we convert the `char[]` into a `String` and print it.
+* This is **insecure**: `String` is immutable and can linger in memory.
+* This step is purely for **demonstration and debugging** — later commits will remove it.
+
+---
+
+### Add inline documentation
+
 ```java
 import java.io.Console;
 
@@ -55,36 +141,30 @@ public class Main {
     }
 
     /*
-     Using char array then converting to string because:
-       - String is immutable, it remains in memory
-       - Can be hacked (memory dump) before Java garbage collector removes it
-     Using console and not scanner because:
-       - Scanner shows password when typed
+     Why char[] instead of String?
+       - String is immutable, it stays in memory until garbage collection.
+       - If memory is dumped, an attacker may retrieve it.
+     Why Console and not Scanner?
+       - Scanner shows characters while typing, not safe for passwords.
     */
     char[] masterKeyChars = console.readPassword("Create a Master key: ");
     String masterKey =
-        new String(masterKeyChars); // replace later (the String conversion is only for demonstration, will be removed later)
+        new String(masterKeyChars); // demo only — will be replaced later
 
     System.out.println("Your master key is : " + masterKey);
   }
 }
-````
+```
+
+We document design decisions (char[] vs String, Console vs Scanner)`
+
+**Explanation:**
+
+* Comments clarify security trade-offs.
+* This helps future readers understand *why* we do things a certain way.
 
 ---
 
-## Program Description
-
-This Java program securely reads a master key from the user by leveraging the `Console` class’s `readPassword()` method, which prevents password characters from being echoed on the screen during input — unlike `Scanner`, which shows typed characters and is less secure for passwords.
-
-The password is initially read as a `char[]` array to allow explicit clearing from memory, since `String` objects in Java are immutable and can linger in memory, posing a security risk if exposed through memory dumps.
-
-Although the code temporarily converts the `char[]` to a `String` for ease of use and demonstration, this is flagged as a **security trade-off** to be addressed later, as storing passwords in immutable `String` form should be avoided.
-
-The program also checks that a console is available before proceeding, since `System.console()` returns `null` in environments without a proper terminal, ensuring graceful failure.
-
-Finally, for testing purposes, it prints the entered master key — which in a production environment should be removed to maintain password confidentiality.
-
----
 
 ## Next Steps
 
@@ -272,7 +352,7 @@ Right before the try block, we already did clear the char[], yet we still clear 
 Arrays.fill(masterKeyChars, ' ');  // Clear password on error too
 ````
 That means by the time execution reaches the catch, masterKeyChars is already wiped, so it’s redundant, BUT not harmful.
-I will keep it either way, ust to show that we always clear char[] when were done using it.
+I will keep it either way, since it shows that we always clear char[] when were done using it.
 ### CHANGING THE ENCRYPTION
 
 After further research, I realized that this encryption method is not secure for real-life password storage. A plain SHA-256 hash is too fast for password/key storage. Attackers can brute-force billions of guesses per second. 
@@ -280,7 +360,8 @@ After further research, I realized that this encryption method is not secure for
 Therefore, the answer is adding a **salt** and using **slow hashing**:  
 We have 2 options: using **PBKDF2** (Java library) or **Argon2** (other options exist).  
 
-Example cost estimates for an 8-character password with uppercase, lowercase, and digits:
+Example of cost estimates for an 8-character password with uppercase, lowercase, and digits:
+[According to 1Password's analysis](https://blog.1password.com/cracking-challenge-update/)
 
 * PBKDF2 100,000 iterations - \$38,000  
 * PBKDF2 600,000 iterations - \$228,000  
@@ -290,8 +371,8 @@ Example cost estimates for an 8-character password with uppercase, lowercase, an
 Observation: Both options are costly for hackers to brute-force, with Argon2 being much more expensive. However, since this is a learning project, **PBKDF2 is sufficient** and convenient (official Java library). Argon2 can be implemented later if the project scales.
 
 ---
-
-### TODO (Project Security Plan)
+now the TODO list changes to the following:
+### TODO
 
 1. **Replace plain SHA-256 with PBKDF2**
    * Use `javax.crypto.SecretKeyFactory` with `"PBKDF2WithHmacSHA256"`.
@@ -346,7 +427,7 @@ Observation: Both options are costly for hackers to brute-force, with Argon2 bei
 
 
 
-### Let's start with 1: Replace plain SHA-256 with PBKDF2
+### 1- Replace plain SHA-256 with PBKDF2
 
 We no longer use SHA-256 via `MessageDigest`, so we remove the following imports:
 
