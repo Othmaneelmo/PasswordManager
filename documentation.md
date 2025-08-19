@@ -1,4 +1,9 @@
+## TODO
+    below paragraphs should be removed/documented
+    Need to document PasswordValidator / ValidationResult
+    Need to add a table of content
 
+    
 # Introduction:
 This project is to build a secure password manager in Java. The main goal is not only to write working code but to understand the security reasoning behind every design choice. 
 
@@ -6,15 +11,13 @@ Password managers are security-critical software: they protect sensitive informa
 
 That’s why this documentation is more than just code comments — it serves three purposes:
 
-#### Code Walkthrough
+#### 1. Code Walkthrough
 Each commit and code snippet is explained with why it exists and what security problem it solves. This way, a beginner can follow the development process step by step.
-#### Design Notes
+#### 2. Design Notes
 Important security trade-offs (e.g., char[] vs String, PBKDF2 vs SHA-256) are recorded so that future maintainers — or learners reading this later — understand the reasoning behind the decisions.
-#### Reference Guide
+#### 3. Reference Guide: 
 As the project grows, this document becomes a source of truth for how passwords are processed, hashed, and stored, as well as how the vault’s encryption and command-line interface (CLI) work. This improves maintainability and helps avoid repeating mistakes.
-## below paragraphs should be removed/documented
-## Need to document PasswordValidator / ValidationResult
-## Need to add a table of content
+
 
 ## Improvements / Recommendations
 1. Avoid converting the password to a `String` — keep it as a `char[]` to improve security.
@@ -26,7 +29,18 @@ As the project grows, this document becomes a source of truth for how passwords 
 
 ---
 
-## Example Code
+## Project Setup
+Let us start with setting up the project.
+We create the main class and method. Always start from a working baseline, even if it just prints something.
+```java
+public class Main {
+  public static void main(String[] args) {
+    System.out.println("Password Manager starting...");
+  }
+}
+````
+
+
 # below code should be documented. 
 ```java
 import java.io.Console;
