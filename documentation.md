@@ -172,6 +172,7 @@ try {
 }
 ````
 
+
 For testing purposes, this section allows us to see the hashed master key as output:
 
 ```java
@@ -238,7 +239,12 @@ public class Main {
 }
 
 ```
-
+Right before the try block, we already did clear the char[], yet we still clear it in the catch block
+```java
+Arrays.fill(masterKeyChars, ' ');  // Clear password on error too
+````
+That means by the time execution reaches the catch, masterKeyChars is already wiped, so it’s redundant, BUT not harmful.
+I will keep it either way, ust to show that we always clear char[] when were done using it.
 ### CHANGING THE ENCRYPTION
 
 After further research, I realized that this encryption method is not secure for real-life password storage. A plain SHA-256 hash is too fast for password/key storage. Attackers can brute-force billions of guesses per second. 
