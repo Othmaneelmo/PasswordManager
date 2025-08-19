@@ -1,8 +1,17 @@
-# This document serves as a : 
-1. Code walkthrough: I'm documenting each step, explaining why each change is made.
-2. Design notes: I'm recording trade-offs and decision making
-3. Reference: This document helps as a reference in the future for maintainability, which will help for understanding the thought process behind code snippets or decisions.
 
+# Introduction:
+This project is to build a secure password manager in Java. The main goal is not only to write working code but to understand the security reasoning behind every design choice. 
+
+Password managers are security-critical software: they protect sensitive information like master keys, stored account credentials, and even files. A single weak spot (such as using String to hold a password, or using a fast hash like plain SHA-256) can expose the entire vault to attackers.
+
+That’s why this documentation is more than just code comments — it serves three purposes:
+
+#### Code Walkthrough
+Each commit and code snippet is explained with why it exists and what security problem it solves. This way, a beginner can follow the development process step by step.
+#### Design Notes
+Important security trade-offs (e.g., char[] vs String, PBKDF2 vs SHA-256) are recorded so that future maintainers — or learners reading this later — understand the reasoning behind the decisions.
+#### Reference Guide
+As the project grows, this document becomes a source of truth for how passwords are processed, hashed, and stored, as well as how the vault’s encryption and command-line interface (CLI) work. This improves maintainability and helps avoid repeating mistakes.
 ## below paragraphs should be removed/documented
 ## Need to document PasswordValidator / ValidationResult
 ## Need to add a table of content
