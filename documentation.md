@@ -1,6 +1,11 @@
+# This document serves as a : 
+1. Code walkthrough: I'm documenting each step, explaining why each change is made.
+2. Design notes: I'm recording trade-offs and decision making
+3. Reference: This document helps as a reference in the future for maintainability, which will help for understanding the thought process behind code snippets or decisions.
+
 ## below paragraphs should be removed/documented
 ## Need to document PasswordValidator / ValidationResult
-### Hello
+## Need to add a table of content
 
 ## Improvements / Recommendations
 1. Avoid converting the password to a `String` — keep it as a `char[]` to improve security.
@@ -13,7 +18,7 @@
 ---
 
 ## Example Code
-
+# below code should be documented. 
 ```java
 import java.io.Console;
 
