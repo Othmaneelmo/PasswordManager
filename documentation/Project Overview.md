@@ -374,7 +374,7 @@ Observation: Both options are costly for hackers to brute-force, with Argon2 bei
 now the TODO list changes to the following:
 ### TODO
 
-1. **Replace plain SHA-256 with PBKDF2**
+1. **Replace plain SHA-256 with PBKDF2WithHmacSHA256**
    * Use `javax.crypto.SecretKeyFactory` with `"PBKDF2WithHmacSHA256"`.
    * Use a random salt (16–32 bytes) for each password.
    * Use a high iteration count (~600,000) for better security.
@@ -428,6 +428,8 @@ now the TODO list changes to the following:
 
 
 ### 1- Replace plain SHA-256 with PBKDF2
+Before we move on to the code, we must understand why we're doing this; how does SHA-256 work, and why is it not secure, and how does PBKDF2WithHmacSHA256 work, and why is it secure. But to leave this file concrete and code progression focused, this will be discussed in the file [SHA-256 to PBKDF2 explanation](SHA-256 to PBKDF2WithHmacSHA256.md)
+
 
 We no longer use SHA-256 via `MessageDigest`, so we remove the following imports:
 
