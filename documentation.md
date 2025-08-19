@@ -188,7 +188,55 @@ private static String bytesToHex(byte[] bytes) {
   return sb.toString();
 }
 ```
+At this point, our Main.java code should look  like the following:
+```java
+import java.io.Console;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 
+public class Main {
+  public static void main(String[] args) {
+
+    Console console = System.console();
+    if (console == null) {
+      System.out.println("console not working, use a terminal!");
+      return;
+    }
+    char[] masterKeyChars = console.readPassword("Create a Master key: ");
+
+    ValidationResult vr = PasswordValidator.validate(masterKeyChars);
+    if (!vr.ok()) {
+      System.out.println("Password not strong enough:");
+      for (String msg : vr.messages()){
+        System.out.println(" - " + msg);
+      }
+      Arrays.fill(masterKeyChars, ' '); // clear array before exiting
+      return;
+    }
+
+    byte[] masterKeyBytes = new byte[masterKeyChars.length * 2];
+    for (int i = 0; i < masterKeyChars.length; i++) {
+        masterKeyBytes[i * 2] = (byte) (masterKeyChars[i] >> 8); //high byte
+        masterKeyBytes[i * 2 + 1] = (byte) masterKeyChars[i]; //low byte
+    }
+    Arrays.fill(masterKeyChars, ' ');    // Clear char[] asap
+
+    byte[] hashedKey = null; 
+    try {
+      MessageDigest digest = MessageDigest.getInstance("SHA-256");
+      hashedKey = digest.digest(masterKeyBytes);
+      Arrays.fill(masterKeyBytes, (byte) 0);    
+    } catch (NoSuchAlgorithmException e) {
+      System.out.println("SHA-256 algorithm not available. Exiting...");
+      Arrays.fill(masterKeyChars, ' ');  // Clear password on error too
+      return;
+    }
+    
+  }
+}
+
+```
 
 ### CHANGING THE ENCRYPTION
 
