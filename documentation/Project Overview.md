@@ -625,3 +625,76 @@ we can confirm this using an encoder algorithm to derive keys, using the same al
 The online encode should give out the same hashed output `PsNa6FM9x7m2eT6sKn1DiXdYBZ/AL2U40yIWDlY38cA=`. (keep in mind that were storing it as Base64 encoded String)
 
 ---
+
+At this stage, our Main.java code should look like the following:
+
+```java
+import java.io.Console;
+import java.security.SecureRandom;
+import java.util.Arrays;
+import java.util.Base64;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+
+public class Main {
+  public static void main(String[] args) {
+
+    Console console = System.console();
+    if (console == null) {
+      System.out.println("Console unavailable. Please run in a terminal environment.");
+      return;
+    }
+
+    char[] masterKeyChars = console.readPassword("Create a Master key: ");
+
+    // Validate password strength
+    ValidationResult vr = PasswordValidator.validate(masterKeyChars);
+    if (!vr.ok()) {
+      System.out.println("Password not strong enough:");
+      for (String msg : vr.messages()){
+        System.out.println(" - " + msg);
+      }
+      Arrays.fill(masterKeyChars, ' '); // clear array before exiting
+      return;
+    }
+
+    // Generate salt
+    SecureRandom saltGenerator = new SecureRandom();
+    byte[] salt = new byte[16]; 
+    saltGenerator.nextBytes(salt);
+    String encodedSalt = Base64.getEncoder().encodeToString(salt);
+
+    int iterations = 600_000;   
+    int keyLength = 256;        
+
+    try {
+        // Create PBKDF2 key spec
+        PBEKeySpec spec = new PBEKeySpec(masterKeyChars, salt, iterations, keyLength);
+        Arrays.fill(masterKeyChars, ' '); // clear immediately after use
+
+        // Derive PBKDF2 hash
+        SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+        byte[] hash = skf.generateSecret(spec).getEncoded();
+        spec.clearPassword();
+
+        // Encode for storage
+        String encodedHash = Base64.getEncoder().encodeToString(hash);
+        String stored = "PBKDF2WithHmacSHA256" + ":" 
+                      + iterations + ":" 
+                      + encodedSalt + ":" 
+                      + encodedHash;
+
+        // Temporary: print for debugging
+        System.out.println("PBKDF2 hash generated and stored:");
+        System.out.println(stored);
+        System.out.println("PBKDF2 hash generated successfully!");
+
+    } catch (Exception e) {
+        System.out.println("Error generating PBKDF2 hash: " + e.getMessage());
+        Arrays.fill(masterKeyChars, ' '); 
+    }
+  }
+}
+```
+
+---
