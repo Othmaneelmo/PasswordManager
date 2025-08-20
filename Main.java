@@ -126,7 +126,7 @@ public class Main {
                       + iterations + ":" 
                       + encodedSalt + ":" 
                       + encodedHash;
-
+        //remove this when done
         System.out.println("PBKDF2 hash generated and stored:");
         System.out.println(stored);
       

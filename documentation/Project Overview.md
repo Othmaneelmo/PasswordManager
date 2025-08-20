@@ -589,3 +589,39 @@ String stored = "PBKDF2WithHmacSHA256" + ":"
 This way, the stored string has all the info required for verification.
 
 ---
+For testing purposes let's print out the stored hash (string)
+```java
+System.out.println("PBKDF2 hash generated and stored:");
+System.out.println(stored);
+```
+* this should be removed later for security
+
+### Example:
+Let's enter the following password: `password123@`
+
+the variables are are:
+```java
+algorithm function : "PBKDF2WithHmacSHA256"
+inputted password : password123@
+iterations : 600000
+encodedSalt : randomly generated at runtime
+encodedHash : output of the algorithm
+```
+
+after running the program, we get the following output:
+```bash
+Create a Master key: 
+
+PBKDF2 hash generated and stored:
+PBKDF2WithHmacSHA256:600000:9izA9T00iAnn1Vi+fg38/Q==:PsNa6FM9x7m2eT6sKn1DiXdYBZ/AL2U40yIWDlY38cA=
+PBKDF2 hash generated successfully!
+```
+
+* we can see that the salt generated on runtime is `9izA9T00iAnn1Vi+fg38/Q==`
+
+* and the created hash is `PsNa6FM9x7m2eT6sKn1DiXdYBZ/AL2U40yIWDlY38cA=`
+
+we can confirm this using an encoder algorithm to derive keys, using the same algorithm `PBKDF2WithHmacSHA256`, the same key `password123@`, with the same number of iterations `600000`, and the salt `9izA9T00iAnn1Vi+fg38/Q==`.
+The online encode should give out the same hashed output `PsNa6FM9x7m2eT6sKn1DiXdYBZ/AL2U40yIWDlY38cA=`. (keep in mind that were storing it as Base64 encoded String)
+
+---
