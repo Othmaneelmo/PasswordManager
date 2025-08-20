@@ -427,8 +427,8 @@ now the TODO list changes to the following:
 
 
 
-### 1- Replace plain SHA-256 with PBKDF2
-Before we move on to the code, we must understand why we're doing this; how does SHA-256 work, and why is it not secure, and how does PBKDF2WithHmacSHA256 work, and why is it secure. But to leave this file concrete and code progression focused, this will be discussed in the file [SHA-256 to PBKDF2 explanation](/documentation/SHA-256%20to%20PBKDF2WithHmacSHA256.md)
+### 1- Replace plain SHA-256 with PBKDF2withHmacSHA256
+Before we move on to the code, we must understand why we're doing this; how does SHA-256 work, and why is it not secure, and how does PBKDF2WithHmacSHA256 work, and why is it secure. But to leave this file concrete and code progression focused, this will be discussed in the file [SHA-256 to PBKDF2PBKDF2withHmacSHA256 explanation](/documentation/SHA-256%20to%20PBKDF2WithHmacSHA256.md)
 
 
 We no longer use SHA-256 via `MessageDigest`, so we remove the following imports:
@@ -465,7 +465,20 @@ for (int i = 0; i < masterKeyChars.length; i++) {
 Arrays.fill(masterKeyChars, ' ');    // Clear char[] asap
 ```
 
-Now we are ready to add **PBKDF2**.
+Now we are ready to add **PBKDF2withHmacSHA256**.
+Lets first add PBKDF2-related imports 
+```java
++ import java.security.SecureRandom;
++ import java.util.Base64;
++ import javax.crypto.SecretKeyFactory;
++ import javax.crypto.spec.PBEKeySpec;
+```
 
+
+
+
+and parameter placeholders
+- added SecureRandom, PBEKeySpec, SecretKeyFactory imports
+- added salt, iterations, key length constants/comments
 
 
