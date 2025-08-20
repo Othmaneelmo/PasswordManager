@@ -513,3 +513,15 @@ int keyLength = 256;        // key length in bits
 * **iterations**: how many times PBKDF2 runs the HMAC function. The higher, the slower brute-force attacks become.
 
 * **keyLength**: final derived key length, here 256 bits.
+---
+Next we Create the PBEKeySpec
+
+Now we use the password (char[]), salt, iteration count, and key length to define the PBKDF2 parameters:
+```java
+PBEKeySpec spec = new PBEKeySpec(masterKeyChars, salt, iterations, keyLength);
+```
+
+PBEKeySpec wraps all the needed info for PBKDF2.
+
+It works directly with char[], so we avoid risky String usage.
+
