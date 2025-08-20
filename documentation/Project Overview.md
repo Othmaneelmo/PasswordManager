@@ -630,10 +630,10 @@ In the case that `PBKDF2WithHmacSHA256` isn’t available, we should add the `No
 ```java
 } catch (NoSuchAlgorithmException e) {
     System.out.println("PBKDF2 algorithm not available: " + e.getMessage());
-    Arrays.fill(masterKeyChars, ' '); // just in case
 } catch (InvalidKeySpecException e) {
     System.out.println("Invalid PBKDF2 key specification: " + e.getMessage());
-    Arrays.fill(masterKeyChars, ' '); // just in case
+} finally{
+  Arrays.fill(masterKeyChars, ' '); // ensures cleanup in all cases
 }
 ```
 this should also add the following imports:
@@ -688,35 +688,40 @@ public class Main {
     int keyLength = 256;        
 
     try {
-        // Create PBKDF2 key spec
+        // Create PBEKeySpec with char[] password, salt, iterations, key length
         PBEKeySpec spec = new PBEKeySpec(masterKeyChars, salt, iterations, keyLength);
-        Arrays.fill(masterKeyChars, ' '); // clear immediately after use
 
-        // Derive PBKDF2 hash
+        // Generate the PBKDF2 hash
         SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
         byte[] hash = skf.generateSecret(spec).getEncoded();
-        spec.clearPassword();
 
-        // Encode for storage
+        // Clear the password inside PBEKeySpec
+        spec.clearPassword();
+        // Encode hash in Base64 for storage
         String encodedHash = Base64.getEncoder().encodeToString(hash);
+
+
+        // Store as algorithm:iterations:salt:hash
         String stored = "PBKDF2WithHmacSHA256" + ":" 
                       + iterations + ":" 
                       + encodedSalt + ":" 
                       + encodedHash;
-
-        // Temporary: print for debugging
+        //remove this when done
         System.out.println("PBKDF2 hash generated and stored:");
         System.out.println(stored);
+      
+        // TODO: store hash + encodedsalt + iterations securely
         System.out.println("PBKDF2 hash generated successfully!");
-
+        
     } catch (NoSuchAlgorithmException e) {
     System.out.println("PBKDF2 algorithm not available: " + e.getMessage());
-    Arrays.fill(masterKeyChars, ' '); // just in case
     } catch (InvalidKeySpecException e) {
     System.out.println("Invalid PBKDF2 key specification: " + e.getMessage());
-    Arrays.fill(masterKeyChars, ' '); // just in case
+
+    }finally {
+    Arrays.fill(masterKeyChars, ' '); // ensures cleanup in all cases
     }
-    
+
   }
 }
 ```

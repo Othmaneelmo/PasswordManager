@@ -110,9 +110,6 @@ public class Main {
         // Create PBEKeySpec with char[] password, salt, iterations, key length
         PBEKeySpec spec = new PBEKeySpec(masterKeyChars, salt, iterations, keyLength);
 
-        // Clear masterKeyChars immediately after creating the spec
-        Arrays.fill(masterKeyChars, ' ');
-
         // Generate the PBKDF2 hash
         SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
         byte[] hash = skf.generateSecret(spec).getEncoded();
@@ -134,12 +131,14 @@ public class Main {
       
         // TODO: store hash + encodedsalt + iterations securely
         System.out.println("PBKDF2 hash generated successfully!");
+        
     } catch (NoSuchAlgorithmException e) {
     System.out.println("PBKDF2 algorithm not available: " + e.getMessage());
-    Arrays.fill(masterKeyChars, ' '); // just in case
     } catch (InvalidKeySpecException e) {
     System.out.println("Invalid PBKDF2 key specification: " + e.getMessage());
-    Arrays.fill(masterKeyChars, ' '); // just in case
+
+    }finally {
+    Arrays.fill(masterKeyChars, ' '); // ensures cleanup in all cases
     }
 
   }
