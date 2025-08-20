@@ -125,7 +125,7 @@ It does this by combining:
 2. **A salt** (random bytes unique per password).
 3. **An iteration count** (e.g., 100,000).
 4. **A pseudorandom function (PRF)** — in our case, `HMAC-SHA256`.
-
+![alt text](image.png)
 ---
 
 ## 3. Why HMAC-SHA256?
