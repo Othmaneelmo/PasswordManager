@@ -46,7 +46,7 @@ public class Main {
     Console console = System.console();
 
     if (console == null) {
-      System.out.println("console not working, use a terminal!");
+      System.out.println("Console unavailable. Please run in a terminal environment.");
       return;
     }
 
@@ -188,7 +188,7 @@ Just as a start, we won't let users enter master keys with less than 8 character
 
 ```java
 //Converting Masterkey char[] to byte[] (for MessageDigest API)
-/*we still convert Master key to String, we need to figure out a way to do it more safely */
+
 byte[] masterKeyBytes = new String(masterKeyChars).getBytes();
 Arrays.fill(masterKeyChars, ' ');
 

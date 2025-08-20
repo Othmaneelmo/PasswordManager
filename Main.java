@@ -70,7 +70,7 @@ public class Main {
 */
     Console console = System.console();
     if (console == null) {
-      System.out.println("console not working, use a terminal!");
+      System.out.println("Console unavailable. Please run in a terminal environment.");
       return;
     }
     char[] masterKeyChars = console.readPassword("Create a Master key: ");
