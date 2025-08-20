@@ -549,3 +549,15 @@ byte[] hash = skf.generateSecret(spec).getEncoded();
 * generateSecret(spec) runs PBKDF2 with our chosen parameters.
 
 * getEncoded() extracts the final derived key as bytes.
+
+---
+We now have to Clear the Password Inside the Spec
+
+PBEKeySpec still keeps a copy of the password. We must clear it:
+```java
+spec.clearPassword();
+```
+
+This ensures the password isn’t left behind in memory.
+
+---
