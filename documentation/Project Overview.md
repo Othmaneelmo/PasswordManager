@@ -525,3 +525,13 @@ PBEKeySpec wraps all the needed info for PBKDF2.
 
 It works directly with char[], so we avoid risky String usage.
 
+---
+After that, we Clear the Original Password Immediately
+
+Once we’ve created the PBEKeySpec, we no longer need masterKeyChars. We wipe it:
+```java
+Arrays.fill(masterKeyChars, ' ');
+```
+
+* This removes the sensitive password data from memory as early as possible.
+
