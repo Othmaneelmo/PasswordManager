@@ -568,3 +568,24 @@ The derived key (hash) is raw bytes, so we encode it to Base64:
 String encodedHash = Base64.getEncoder().encodeToString(hash);
 ```
 ---
+Now let's Store Parameters Together
+
+To verify passwords later, we must store all parameters:
+```java
+String stored = "PBKDF2WithHmacSHA256" + ":" 
+              + iterations + ":" 
+              + encodedSalt + ":" 
+              + encodedHash;
+```
+
+* Algorithm name (for future-proofing).
+
+* Iterations (because they might change in the future).
+
+* Salt (needed for verification).
+
+* Hash (the derived key).
+
+This way, the stored string has all the info required for verification.
+
+---
