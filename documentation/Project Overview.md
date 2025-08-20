@@ -490,7 +490,16 @@ saltGenerator.nextBytes(salt);
 
 * nextBytes fills the salt array with secure random values.
 
+next we encode the salt to be able to store it, we use Base64 encoding:
 
+Salts are binary data, so we need to store them in a readable format:
+```java
+String encodedSalt = Base64.getEncoder().encodeToString(salt);
+```
+
+Base64 turns the raw bytes into a printable string.
+
+This makes it easier to save the salt in files, databases, or text-based formats.
 
 
 
