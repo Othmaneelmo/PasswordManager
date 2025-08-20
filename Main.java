@@ -53,7 +53,9 @@
 
 
 import java.io.Console;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.Base64;
 import javax.crypto.SecretKeyFactory;
@@ -132,10 +134,12 @@ public class Main {
       
         // TODO: store hash + encodedsalt + iterations securely
         System.out.println("PBKDF2 hash generated successfully!");
-    } catch (Exception e) {
-        System.out.println("Error generating PBKDF2 hash: " + e.getMessage());
-        Arrays.fill(masterKeyChars, ' '); // just in case
-        return;
+    } catch (NoSuchAlgorithmException e) {
+    System.out.println("PBKDF2 algorithm not available: " + e.getMessage());
+    Arrays.fill(masterKeyChars, ' '); // just in case
+    } catch (InvalidKeySpecException e) {
+    System.out.println("Invalid PBKDF2 key specification: " + e.getMessage());
+    Arrays.fill(masterKeyChars, ' '); // just in case
     }
 
   }

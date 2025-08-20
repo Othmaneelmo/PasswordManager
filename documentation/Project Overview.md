@@ -625,6 +625,24 @@ we can confirm this using an encoder algorithm to derive keys, using the same al
 The online encode should give out the same hashed output `PsNa6FM9x7m2eT6sKn1DiXdYBZ/AL2U40yIWDlY38cA=`. (keep in mind that were storing it as Base64 encoded String)
 
 ---
+In the case that `PBKDF2WithHmacSHA256` isn’t available, we should add the `NoSuchAlgorithmException` in the catch block. There is also the possibility that the `PBEKeySpec` parameters are invalid, so we add the `InvalidKeySpecException` as well
+
+```java
+} catch (NoSuchAlgorithmException e) {
+    System.out.println("PBKDF2 algorithm not available: " + e.getMessage());
+    Arrays.fill(masterKeyChars, ' '); // just in case
+} catch (InvalidKeySpecException e) {
+    System.out.println("Invalid PBKDF2 key specification: " + e.getMessage());
+    Arrays.fill(masterKeyChars, ' '); // just in case
+}
+```
+this should also add the following imports:
+```java
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+```
+
+---
 
 At this stage, our Main.java code should look like the following:
 
@@ -635,6 +653,8 @@ import java.util.Arrays;
 import java.util.Base64;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 
 public class Main {
   public static void main(String[] args) {
@@ -689,10 +709,14 @@ public class Main {
         System.out.println(stored);
         System.out.println("PBKDF2 hash generated successfully!");
 
-    } catch (Exception e) {
-        System.out.println("Error generating PBKDF2 hash: " + e.getMessage());
-        Arrays.fill(masterKeyChars, ' '); 
+    } catch (NoSuchAlgorithmException e) {
+    System.out.println("PBKDF2 algorithm not available: " + e.getMessage());
+    Arrays.fill(masterKeyChars, ' '); // just in case
+    } catch (InvalidKeySpecException e) {
+    System.out.println("Invalid PBKDF2 key specification: " + e.getMessage());
+    Arrays.fill(masterKeyChars, ' '); // just in case
     }
+    
   }
 }
 ```
