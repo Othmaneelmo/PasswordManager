@@ -76,8 +76,170 @@ After 64 rounds, the **eight working variables** are combined to form the **fina
 **Why?**
 This final output is the **unique fingerprint of the original input**, which is **irreversible** and suitable for verifying data integrity or storing secure digests.
 
+### 5. Why SHA-256 Alone is Not Enough for Password Security
 
-it is not safe because of attacks like: 
+Although SHA-256 is **cryptographically strong** for data integrity and digital signatures, it **is not ideal for password storage** by itself. This is because:
 
-Hash extension attack
-https://www.youtube.com/watch?v=03quPNadUzY
+* **Fast hashing** – SHA-256 can compute billions of hashes per second on modern hardware. This makes **brute-force and dictionary attacks feasible** against weak passwords.
+* **No built-in salt** – Without a unique salt per password, attackers can use **precomputed tables (rainbow tables)** to reverse common passwords.
+* **Vulnerable to length extension attacks** – Certain constructions using SHA-256 (like naïve MACs) can be exploited.
+
+  * Reference: [Hash Extension Attack – YouTube](https://www.youtube.com/watch?v=03quPNadUzY)
+
+**Example**: If an attacker gets your SHA-256 hashed password database, they can try **millions of password guesses per second**, which can crack weak passwords very quickly.
+
+Perfect — let’s really dig deep into **PBKDF2WithHmacSHA256** so it’s more than just a surface-level mention. I’ll walk you through what it is, *why* it exists, *how* it works step by step, and how it improves on SHA-256 alone.
+
+---
+
+# PBKDF2WithHmacSHA256
+
+---
+
+## 1. Why Do We Need PBKDF2?
+
+When we store passwords, simply applying **SHA-256(password)** is unsafe because:
+
+* **Too fast** → Modern CPUs/GPUs can compute billions of SHA-256 hashes per second. This makes brute-force guessing attacks feasible.
+* **No salt** → If two users choose the same password, the hashes will be identical. Attackers can also use **rainbow tables** (precomputed hash dictionaries).
+* **Vulnerable constructions** → Directly hashing with SHA-256 doesn’t prevent certain cryptographic attacks, like length extension.
+
+So we need a **password hashing strategy** that is:
+
+* **Slow** → To resist brute-force.
+* **Unique** → Even identical passwords hash differently.
+* **Cryptographically sound** → Resistant to known attacks.
+
+---
+
+## 2. What is PBKDF2?
+
+**PBKDF2** = *Password-Based Key Derivation Function 2*.
+
+It is defined in [RFC 8018](https://www.rfc-editor.org/rfc/rfc8018).
+Its purpose: take a password and make it into a **cryptographically strong key** that is expensive to guess.
+
+It does this by combining:
+
+1. **A password** (e.g., `"MySuperSecret123"`).
+2. **A salt** (random bytes unique per password).
+3. **An iteration count** (e.g., 100,000).
+4. **A pseudorandom function (PRF)** — in our case, `HMAC-SHA256`.
+
+---
+
+## 3. Why HMAC-SHA256?
+
+HMAC (Hash-based Message Authentication Code) is used instead of plain SHA-256 because:
+
+* It turns SHA-256 into a **keyed hash function**.
+* It **removes vulnerabilities** like length extension.
+* It provides stronger **cryptographic mixing** of the password and salt.
+
+So, **PBKDF2WithHmacSHA256** = PBKDF2 that uses HMAC-SHA256 as its PRF.
+
+[How hmac works](https://www.youtube.com/watch?v=MKn3cxFNN1I)
+
+---
+
+## 4. How PBKDF2WithHmacSHA256 Works (Step by Step)
+
+Let’s break it down:
+
+### Step 1: Input
+
+* Password: `"hunter2"`
+* Salt: `random 16 bytes` (e.g., `0x1f2a3b...`)
+* Iterations: `100,000`
+* Output key length: `32 bytes (256 bits)`
+
+---
+
+### Step 2: HMAC Function
+
+PBKDF2 calls `HMAC-SHA256(password, salt || blockIndex)`.
+
+* `blockIndex` is a counter (1, 2, 3, …) used to generate enough key material.
+* Each call produces 32 bytes.
+
+---
+
+### Step 3: Iterations (Stretching)
+
+Instead of using just one HMAC call, PBKDF2 **repeats it many times**:
+
+```
+U1 = HMAC(password, salt || blockIndex)
+U2 = HMAC(password, U1)
+U3 = HMAC(password, U2)
+...
+Uc = HMAC(password, U(c-1))   // after c iterations
+```
+
+Then PBKDF2 **XORs** all these results together:
+
+```
+F = U1 ⊕ U2 ⊕ U3 ⊕ ... ⊕ Uc
+```
+
+That final `F` is the derived key block for this `blockIndex`.
+
+---
+
+### Step 4: Multiple Blocks
+
+If you need more than 32 bytes (e.g., a 64-byte key), PBKDF2 just repeats the above process with `blockIndex = 2, 3, ...`.
+
+---
+
+### Step 5: Output
+
+The concatenated blocks form the final derived key, e.g.:
+
+```
+0x9f2b...d7c4e8
+```
+
+---
+
+## 5. Why is This Secure?
+
+* **Salt** → Prevents rainbow table attacks. Each password is hashed uniquely.
+* **Iterations** → Slows down brute force. If SHA-256 can do 1 billion hashes/sec, then 100,000 iterations reduces this to \~10,000 guesses/sec.
+* **HMAC** → Strong PRF that removes weaknesses of plain SHA-256.
+* **Deterministic** → Same password + salt + iterations always gives the same derived key (important for verification).
+
+---
+
+## 6. Real Example
+
+Suppose a user picks the password `"password123"`.
+
+* Salt = `0xAB12F4...`
+* Iterations = `100,000`
+* PBKDF2WithHmacSHA256 outputs:
+
+```
+c83c0f65e5f6d31f39df98cd...   (64 hex chars = 32 bytes)
+```
+
+If the attacker tries to brute-force, they need to run **100,000 SHA-256 operations per guess**. That makes cracking even weak passwords significantly harder.
+
+---
+
+## 7. Why Not Just SHA-256?
+
+Without PBKDF2:
+
+* `"password123"` → SHA-256 →
+  `ef92b778...e4a938d4c`
+
+An attacker can check billions of these per second using GPU clusters.
+
+With PBKDF2 (100k iterations):
+
+* `"password123"` → PBKDF2WithHmacSHA256 →
+  `c83c0f65...`
+
+Now every guess costs **100,000 HMAC-SHA256 ops**, making large-scale brute force infeasible.
+
