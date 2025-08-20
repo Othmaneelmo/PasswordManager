@@ -474,11 +474,24 @@ Lets first add PBKDF2-related imports
 + import javax.crypto.spec.PBEKeySpec;
 ```
 
+Next we add the Salt generation:
+We need a random salt to make sure the same password doesn’t always produce the same hash.
+
+Add the following:
+```java
+SecureRandom saltGenerator = new SecureRandom();
+byte[] salt = new byte[16]; // 16 bytes = 128 bits
+saltGenerator.nextBytes(salt);
+```
+
+* SecureRandom is a cryptographically secure random number generator.
+
+* salt is a 16-byte random value (128 bits is enough for salts).
+
+* nextBytes fills the salt array with secure random values.
 
 
 
-and parameter placeholders
-- added SecureRandom, PBEKeySpec, SecretKeyFactory imports
-- added salt, iterations, key length constants/comments
+
 
 
