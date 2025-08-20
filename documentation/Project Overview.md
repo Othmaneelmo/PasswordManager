@@ -464,7 +464,7 @@ for (int i = 0; i < masterKeyChars.length; i++) {
 }
 Arrays.fill(masterKeyChars, ' ');    // Clear char[] asap
 ```
-
+---
 Now we are ready to add **PBKDF2withHmacSHA256**.
 Lets first add PBKDF2-related imports 
 ```java
@@ -473,7 +473,7 @@ Lets first add PBKDF2-related imports
 + import javax.crypto.SecretKeyFactory;
 + import javax.crypto.spec.PBEKeySpec;
 ```
-
+---
 Next we add the Salt generation:
 We need a random salt to make sure the same password doesn’t always produce the same hash.
 
@@ -489,7 +489,7 @@ saltGenerator.nextBytes(salt);
 * salt is a 16-byte random value (128 bits is enough for salts).
 
 * nextBytes fills the salt array with secure random values.
-
+---
 Next we encode the salt to be able to store it, we use Base64 encoding:
 
 Salts are binary data, so we need to store them in a readable format:
@@ -501,6 +501,15 @@ Base64 turns the raw bytes into a printable string.
 
 This makes it easier to save the salt in files, databases, or text-based formats.
 
+---
+Next we Define Iterations and Key Length
 
+PBKDF2 requires two important parameters:
+```java
+int iterations = 600_000;   // high iteration count
+int keyLength = 256;        // key length in bits
+```
 
+* **iterations**: how many times PBKDF2 runs the HMAC function. The higher, the slower brute-force attacks become.
 
+* **keyLength**: final derived key length, here 256 bits.
