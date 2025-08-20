@@ -535,3 +535,17 @@ Arrays.fill(masterKeyChars, ' ');
 
 * This removes the sensitive password data from memory as early as possible.
 
+---
+Now we need to Generate the PBKDF2 Hash
+
+We create a PBKDF2 generator and derive the key:
+```java
+SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+byte[] hash = skf.generateSecret(spec).getEncoded();
+```
+
+* SecretKeyFactory initializes PBKDF2 with HMAC-SHA256.
+
+* generateSecret(spec) runs PBKDF2 with our chosen parameters.
+
+* getEncoded() extracts the final derived key as bytes.
