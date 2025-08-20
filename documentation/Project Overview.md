@@ -561,3 +561,10 @@ spec.clearPassword();
 This ensures the password isn’t left behind in memory.
 
 ---
+Now we have to Encode Hash for Storage
+
+The derived key (hash) is raw bytes, so we encode it to Base64:
+```java
+String encodedHash = Base64.getEncoder().encodeToString(hash);
+```
+---
