@@ -3,9 +3,11 @@
  */
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class VaultStorage {
-    private static final String FILE_NAME = "vault.json";
+    private static final String masterkey= "masterkey.json";
 
     // Save master key hash + salt + iterations
     public static void saveMasterKey(String algorithm, int iterations, String salt, String hash) throws IOException {
@@ -20,6 +22,6 @@ public class VaultStorage {
 
     // Check if a vault file already exists
     public static boolean exists() {
-        // TODO: implement file existence check
-        return false;
+        return Files.exists(Path.of(masterkey));
     }
+}
