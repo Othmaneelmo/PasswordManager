@@ -53,6 +53,7 @@
 
 
 import java.io.Console;
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -62,7 +63,7 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 public class Main {
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
 /*
     using char array then converting to string because:
         - String are immutable, they are saved in memory
@@ -75,6 +76,11 @@ public class Main {
       System.out.println("Console unavailable. Please run in a terminal environment.");
       return;
     }
+
+    //Check if vaultStorage exists
+//    if (VaultStorage.exists()) {
+//      return;
+//    }
     char[] masterKeyChars = console.readPassword("Create a Master key: ");
 
 
@@ -129,8 +135,13 @@ public class Main {
         System.out.println("PBKDF2 hash generated and stored:");
         System.out.println(stored);
       
-        // TODO: store hash + encodedsalt + iterations securely
+        /*TODO: store hash + encodedsalt + iterations securely*/
         System.out.println("PBKDF2 hash generated successfully!");
+
+        if (VaultStorage.exists()) {
+            VaultStorage.saveMasterKey("PBKDF2WithHmacSHA256", iterations, encodedSalt, encodedHash);
+        }
+
         
     } catch (NoSuchAlgorithmException e) {
     System.out.println("PBKDF2 algorithm not available: " + e.getMessage());
@@ -140,6 +151,8 @@ public class Main {
     }finally {
     Arrays.fill(masterKeyChars, ' '); // ensures cleanup in all cases
     }
+
+
 
   }
 }

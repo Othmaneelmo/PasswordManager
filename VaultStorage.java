@@ -19,7 +19,12 @@ public class VaultStorage {
 
         // Build minimal JSON string manually (no library yet)
         String json = String.format(
-            "{ \"algorithm\": \"%s\", \"iterations\": %d, \"salt\": \"%s\", \"hash\": \"%s\" }",
+            "{\n" +
+            "  \"algorithm\": \"%s\",\n" +
+            "  \"iterations\": %d,\n" +
+            "  \"salt\": \"%s\",\n" +
+            "  \"hash\": \"%s\"\n" +
+            "}",
             algorithm, iterations, salt, hash
         );
 

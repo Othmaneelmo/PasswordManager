@@ -23,13 +23,13 @@ FOLLOWING are CHATGPT recommmendation (check for validity later):
         - Even with strong rules, implement slow hashing (e.g., Argon2id with high memory cost) so brute force attempts are impractical.
         - Rate-limit and lockout for online entry attempts.
 
--  No arbitrary “max length” unless necessary
+-  No arbitrary "max length" unless necessary
         - Many breaches happen because developers truncate or mishandle long passwords.
         - Support at least 128 characters to future-proof.
 
 -  Educate instead of frustrate
         - Don’t just reject a password — explain why it’s weak and show examples of better ones.
-        - If you support passphrases, make that clear in the UI (“A long phrase like ‘correct horse battery staple lamp’ is stronger than P@ssw0rd1!”).
+        - If you support passphrases, make that clear in the UI (""A long phrase like ‘correct horse battery staple lamp’ is stronger than P@ssw0rd1!").
 
 -  Avoid forced regular changes
         - For a master key, forcing users to change it every X days leads to weaker, easier-to-remember passwords.
@@ -44,7 +44,7 @@ FOLLOWING are CHATGPT recommmendation (check for validity later):
         - Always hash the entire master key with something like Argon2id and never truncate before hashing.
 
 -  Entropy measurement, not just pattern rules
-        - Two passwords can meet all “has uppercase, lowercase, number, special” rules and still be weak (P@ssw0rd123!).
+        - Two passwords can meet all "has uppercase, lowercase, number, special" rules and still be weak (P@ssw0rd123!).
         - Use an entropy estimator (like zxcvbn) to reject anything with estimated crack time < ~10^14 guesses.
 
 -  Handle copy-paste correctly
