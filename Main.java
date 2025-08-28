@@ -134,9 +134,16 @@
           /*TODO: store hash + encodedsalt + iterations securely*/
           System.out.println("PBKDF2 hash generated successfully!");
 
-          if (VaultStorage.exists()) {
-              VaultStorage.saveMasterKey("PBKDF2WithHmacSHA256", iterations, encodedSalt, encodedHash);
-          }
+        
+        if (!VaultStorage.exists()) {   // Save only if file doesn’t already exist
+            VaultStorage.saveMasterKey("PBKDF2WithHmacSHA256", iterations, encodedSalt, encodedHash);
+            System.out.println("Master key saved to vault!");
+        } else {
+          VaultStorage.saveMasterKey("PBKDF2WithHmacSHA256", iterations, encodedSalt, encodedHash);
+          System.out.println("Master key saved to vault!");
+          //in case we DONt want to overwrite ---> will decide.
+          // System.out.println("Master key already exists — not overwriting.");
+        }
 
           
       } catch (NoSuchAlgorithmException e) {
