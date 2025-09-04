@@ -55,12 +55,9 @@
   import java.io.Console;
   import java.io.IOException;
   import java.security.NoSuchAlgorithmException;
-  import java.security.SecureRandom;
   import java.security.spec.InvalidKeySpecException;
   import java.util.Arrays;
   import java.util.Base64;
-  import javax.crypto.SecretKeyFactory;
-  import javax.crypto.spec.PBEKeySpec;
 
   public class Main {
     public static void main(String[] args) throws IOException {
@@ -99,60 +96,43 @@
         return;
       }
 
-      // --- PBKDF2 placeholders ---
-      SecureRandom saltGenerator = new SecureRandom();
-      byte[] salt = new byte[16]; // 16 bytes = 128 bits
-      saltGenerator.nextBytes(salt);
-      // Encode salt in Base64 for storage
-      String encodedSalt = Base64.getEncoder().encodeToString(salt);
       int iterations = 600_000;   // high iteration count
-      int keyLength = 256;        // key length in bit
+      byte[] salt = PBKDF2Hasher.generateSalt();
+      String encodedSalt = Base64.getEncoder().encodeToString(salt);
+
         
       try {
-          // Create PBEKeySpec with char[] password, salt, iterations, key length
-          PBEKeySpec spec = new PBEKeySpec(masterKeyChars, salt, iterations, keyLength);
-
-          // Generate the PBKDF2 hash
-          SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-          byte[] hash = skf.generateSecret(spec).getEncoded();
-
-          // Clear the password inside PBEKeySpec
-          spec.clearPassword();
-          // Encode hash in Base64 for storage
-          String encodedHash = Base64.getEncoder().encodeToString(hash);
-
+          String encodedHash = PBKDF2Hasher.hashPassword(masterKeyChars, salt, iterations);
 
           // Store as algorithm:iterations:salt:hash
-          String stored = "PBKDF2WithHmacSHA256" + ":" 
-                        + iterations + ":" 
-                        + encodedSalt + ":" 
-                        + encodedHash;
-          //remove this when done
+          String stored = "PBKDF2WithHmacSHA256" + ":"
+                  + iterations + ":"
+                  + encodedSalt + ":"
+                  + encodedHash;
+
+          // remove this when done
           System.out.println("PBKDF2 hash generated and stored:");
           System.out.println(stored);
-        
+
           /*TODO: store hash + encodedsalt + iterations securely*/
           System.out.println("PBKDF2 hash generated successfully!");
 
-        
-        if (!VaultStorage.exists()) {   // Save only if file doesn’t already exist
-            VaultStorage.saveMasterKey("PBKDF2WithHmacSHA256", iterations, encodedSalt, encodedHash);
-            System.out.println("Master key saved to vault!");
-        } else {
-          VaultStorage.saveMasterKey("PBKDF2WithHmacSHA256", iterations, encodedSalt, encodedHash);
-          System.out.println("Master key saved to vault!");
-          //in case we DONt want to overwrite ---> will decide.
-          // System.out.println("Master key already exists — not overwriting.");
-        }
+          if (!VaultStorage.exists()) {
+              VaultStorage.saveMasterKey("PBKDF2WithHmacSHA256", iterations, encodedSalt, encodedHash);
+              System.out.println("Master key saved to vault!");
+          } else {
+              VaultStorage.saveMasterKey("PBKDF2WithHmacSHA256", iterations, encodedSalt, encodedHash);
+              System.out.println("Master key saved to vault!");
+              // in case we DON’t want to overwrite:
+              // System.out.println("Master key already exists — not overwriting.");
+          }
 
-          
       } catch (NoSuchAlgorithmException e) {
-      System.out.println("PBKDF2 algorithm not available: " + e.getMessage());
+          System.out.println("PBKDF2 algorithm not available: " + e.getMessage());
       } catch (InvalidKeySpecException e) {
-      System.out.println("Invalid PBKDF2 key specification: " + e.getMessage());
-
-      }finally {
-      Arrays.fill(masterKeyChars, ' '); // ensures cleanup in all cases
+          System.out.println("Invalid PBKDF2 key specification: " + e.getMessage());
+      } finally {
+          Arrays.fill(masterKeyChars, ' '); // ensures cleanup in all cases
       }
 
 
