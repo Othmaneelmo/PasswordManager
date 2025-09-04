@@ -6,7 +6,9 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 public class PBKDF2Hasher {
-    private static final int KEY_LENGTH = 256; // key length in bits
+    private static final int KEY_LENGTH = 256;     // in bits
+    private static final int DEFAULT_ITERATIONS = 600_000;
+    private static final int SALT_LENGTH = 16;     // 16 bytes = 128 bits
 
     // Generate a random salt (16 bytes)
     public static byte[] generateSalt() {
