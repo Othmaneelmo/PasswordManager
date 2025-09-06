@@ -19,15 +19,16 @@ public class PBKDF2Hasher {
     }
 
     // Hash a password with PBKDF2 (using provided salt and iterations)
-    public static String hashPassword(char[] password, byte[] salt, int iterations)
+    public static HashedPassword hashPassword(char[] password, byte[] salt, int iterations)
     throws NoSuchAlgorithmException, InvalidKeySpecException 
     {
-
         PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, KEY_LENGTH);
         SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
         byte[] hash = skf.generateSecret(spec).getEncoded();
         spec.clearPassword(); // wipe sensitive data
-        return Base64.getEncoder().encodeToString(hash);
+        String encodedSalt = Base64.getEncoder().encodeToString(salt);
+        String encodedHash = Base64.getEncoder().encodeToString(hash);
+        return new HashedPassword("PBKDF2WithHmacSHA256", iterations, encodedSalt, encodedHash);
     }
 
     //Hash using default constants
@@ -35,9 +36,7 @@ public class PBKDF2Hasher {
     throws NoSuchAlgorithmException, InvalidKeySpecException
     {
         byte[] salt = generateSalt();
-        String encodedSalt = Base64.getEncoder().encodeToString(salt);
-        String encodedHash = hashPassword(password, salt, DEFAULT_ITERATIONS);
-        return new HashedPassword("PBKDF2WithHmacSHA256", DEFAULT_ITERATIONS, encodedSalt, encodedHash);
+        return hashPassword(password, salt, DEFAULT_ITERATIONS);
     }
 
     //verify Password
@@ -45,13 +44,12 @@ public class PBKDF2Hasher {
     throws NoSuchAlgorithmException, InvalidKeySpecException
     {
         byte[] salt = Base64.getDecoder().decode(stored.getSalt());
-        String testHash = hashPassword(password, salt, stored.getIterations());
-        return testHash.equals(stored.getHash());
+        HashedPassword testHp = hashPassword(password, salt, stored.getIterations());
+        return testHp.getHash().equals(stored.getHash());
         /*
-        Only using ".equals" :
-        No need to use "constant time equals" to compare  inputted hash with stored hash,
-        timing attacks are unrealistic with PBKDF2 hashes
-        */
+         * Only using ".equals":
+         * No need for constant-time equals — timing attacks are unrealistic with PBKDF2.
+         */
 
     }
 }

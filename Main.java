@@ -95,35 +95,36 @@
         Arrays.fill(masterKeyChars, ' '); // clear array before exiting
         return;
       }
-
-      int iterations = 600_000;   // high iteration count
+/* in case we dont use default parameters
+ *    int iterations = 600_000;   // high iteration count
       byte[] salt = PBKDF2Hasher.generateSalt();
       String encodedSalt = Base64.getEncoder().encodeToString(salt);
+ * 
+*/
+
 
         
       try {
-          String encodedHash = PBKDF2Hasher.hashPassword(masterKeyChars, salt, iterations);
+          HashedPassword encodedHash = PBKDF2Hasher.defaultHashPassword(masterKeyChars);
 
-          // Store as algorithm:iterations:salt:hash
-          String stored = "PBKDF2WithHmacSHA256" + ":"
-                  + iterations + ":"
-                  + encodedSalt + ":"
-                  + encodedHash;
-
-          // remove this when done
+          /*
+          Below  prints out algorithm:iterations:salt:hash in console
+          REMOVE LATER
+          */ 
+          String printOutHashInfo = encodedHash.getAlgorithm() + ":" + encodedHash.getIterations() + ":" + encodedHash.getSalt() + ":" + encodedHash.getHash();
           System.out.println("PBKDF2 hash generated and stored:");
-          System.out.println(stored);
+          System.out.println(printOutHashInfo);
 
           /*TODO: store hash + encodedsalt + iterations securely*/
           System.out.println("PBKDF2 hash generated successfully!");
 
           if (!VaultStorage.exists()) {
-              VaultStorage.saveMasterKey("PBKDF2WithHmacSHA256", iterations, encodedSalt, encodedHash);
+              VaultStorage.saveMasterKey(encodedHash.getAlgorithm(), encodedHash.getIterations(), encodedHash.getSalt(), encodedHash.getHash());
               System.out.println("Master key saved to vault!");
           } else {
-              VaultStorage.saveMasterKey("PBKDF2WithHmacSHA256", iterations, encodedSalt, encodedHash);
+              VaultStorage.saveMasterKey(encodedHash.getAlgorithm(), encodedHash.getIterations(), encodedHash.getSalt(), encodedHash.getHash());
               System.out.println("Master key saved to vault!");
-              // in case we DON’t want to overwrite:
+              // We shouldnt overwrite, only overwriting for testing purposes, (maybe add official overwiting option later):
               // System.out.println("Master key already exists — not overwriting.");
           }
 

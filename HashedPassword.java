@@ -23,7 +23,4 @@ public class HashedPassword {
     public String getHash() {
         return hash;
     }
-
-
-
 }
