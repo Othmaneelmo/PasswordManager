@@ -5,25 +5,17 @@
 */
 /* TODO (Project Security Plan):
  *
- * 1. Replace plain SHA-256 with PBKDF2:
- *    - Use javax.crypto.SecretKeyFactory with "PBKDF2WithHmacSHA256".
- *    - Use a random salt (16–32 bytes) for each password.
- *    - Use a high iteration count (e.g., ~600,000) for better security.
- *    - Store: hash + salt + iteration count.
- *    - Use SecureRandom for generating salts.
- *
- * 2. Implement password verification:
+ * 1. Implement password verification:
  *    - On login, load salt + iteration count + hash from storage.
  *    - Run PBKDF2 with the same parameters on the entered password.
- *    - Compare results securely (constant-time).
  *    - Keep derived encryption key only in memory after unlock.
  *
- * 3. Update storage format:
+ * 2. Update storage format:
  *    - Save hash, salt, iteration count per master key.
  *    - Store encrypted account passwords (AES-GCM recommended) with IVs.
  *    - Consider a formatVersion/algorithmVersion field for future upgrades.
  *
- * 4. Add CLI menu (top-level interface):
+ * 3. Add CLI menu (top-level interface):
  *        [1] Set/Reset Master Key       # Create or change the vault's master key
  *        [2] Unlock Vault               # Authenticate to access stored passwords
  *        [3] Add Account Password       # Store account name + password (encrypted)
@@ -33,18 +25,17 @@
  *        [7] Decrypt a File             # Bonus: decrypt file with derived key
  *        [0] Exit
  *
- * 5. Project structure / utilities:
- *    - Keep crypto logic in separate classes (PasswordHasher, VaultStorage, CryptoUtils).
+ * 4. Project structure / utilities:
  *    - Plan storage location (file, JSON, or SQLite) for hashes + encrypted data.
  *    - Ensure secure random generation for salts, IVs, etc.
  *
- * 6. Testing:
+ * 5. Testing:
  *    - Verify password hashing and verification.
  *    - Verify encryption/decryption of account passwords and files.
  *    - Test edge cases (empty/long passwords, invalid input).
  *    - Ensure login/unlock is reasonably fast (< 1 second).
  *
- * 7. Logging / safety:
+ * 6. Logging / safety:
  *    - Do not log sensitive data (plaintext passwords, keys, hashes).
  *    - Use logging only for general program flow/debug info.
  *
