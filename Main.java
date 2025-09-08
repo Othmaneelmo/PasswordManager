@@ -111,10 +111,10 @@ public class Main {
             VaultStorage.saveMasterKey(encodedHash.getAlgorithm(), encodedHash.getIterations(), encodedHash.getSalt(), encodedHash.getHash());
             System.out.println("Master key saved to vault!");
         } else {
+          //below overwrites masterkey.json, current raw masterkey: password123@
             VaultStorage.saveMasterKey(encodedHash.getAlgorithm(), encodedHash.getIterations(), encodedHash.getSalt(), encodedHash.getHash());
             System.out.println("Master key saved to vault!");
-            // We shouldnt overwrite, only overwriting for testing purposes, (maybe add official overwiting option later):
-            // System.out.println("Master key already exists — not overwriting.");
+          //System.out.println("Master key already exists — not overwriting.");
         }
 
     } catch (NoSuchAlgorithmException e) {
