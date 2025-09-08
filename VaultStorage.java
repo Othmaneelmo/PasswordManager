@@ -10,6 +10,11 @@ public class VaultStorage {
     private static final Path masterKeyFile = vaultFolder.resolve("masterKey.json"); // file path
     // private static final Path otherFile = vaultFolder.resolve("other.json"); // optional future files
 
+    // Check if a vault file already exists
+    public static boolean exists() {
+        return Files.exists(masterKeyFile);
+    }
+
     // Save master key hash + salt + iterations
     public static void saveMasterKey(String algorithm, int iterations, String salt, String hash) throws IOException {
         // Ensure Vault folder exists
@@ -40,8 +45,17 @@ public class VaultStorage {
         return Files.readString(masterKeyFile).trim();
     }
 
-    // Check if a vault file already exists
-    public static boolean exists() {
-        return Files.exists(masterKeyFile);
+    public static HashedPassword loadHashedPassword() throws IOException {
+        if (!Files.exists(masterKeyFile)) {
+            return null;
+        }
+        String json = Files.readString(masterKeyFile);
+        String algorithm = json.replaceAll("(?s).*\"algorithm\":\\s*\"([^\"]+)\".*", "$1");
+        int iterations = Integer.parseInt(json.replaceAll("(?s).*\"iterations\":\\s*(\\d+).*", "$1"));
+        String salt = json.replaceAll("(?s).*\"salt\":\\s*\"([^\"]+)\".*", "$1");
+        String hash = json.replaceAll("(?s).*\"hash\":\\s*\"([^\"]+)\".*", "$1");
+        return new HashedPassword(algorithm, iterations, salt, hash);
     }
+
+
 }

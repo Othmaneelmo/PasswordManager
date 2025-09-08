@@ -124,6 +124,35 @@ public class Main {
     } finally {
         Arrays.fill(masterKeyChars, ' '); // ensures cleanup in all cases
     }
+    
+    
+    //Test: load and verify masterkey
+    if(VaultStorage.exists()){
+      System.out.println("Testing masterkey Loading and Verification");
+      try{
+        //Load JSON and parse it into HashedPassword
+        HashedPassword stored = VaultStorage.loadHashedPassword();
+
+        //Ask user to reenter masterkey for verifying
+        char[] masterKeyVerification = console.readPassword("Re-enter the masterkey: ");
+        
+        boolean sameMasterKey = PBKDF2Hasher.verifyPassword(masterKeyVerification, stored);
+
+        if(sameMasterKey){
+          System.out.println("same masterKey inputted: Good!");
+        }else{
+          System.out.println("Wrong masterKey, or Something went Wrong!");
+        }
+        Arrays.fill(masterKeyVerification, ' ');  //cleanUp
+      
+      }catch(IOException IOErr){
+        System.out.println("Error reading vault: " + IOErr.getMessage());
+      }catch(NoSuchAlgorithmException algoErr){
+        System.out.println("Cannot find Used Algorithm: " + algoErr.getMessage());
+      }catch(InvalidKeySpecException keySpecErr){
+        System.out.println("Key Spec error: " + keySpecErr.getMessage());
+      }
+    }
 
   }
 }
