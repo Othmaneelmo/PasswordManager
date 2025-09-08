@@ -1,0 +1,71 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+' Main entry point
+class Main {
+    +main(args: String[]) : void
+}
+
+' Immutable hashed password container
+class HashedPassword {
+    -algorithm: String
+    -iterations: int
+    -salt: String
+    -hash: String
+    +HashedPassword(algorithm: String, iterations: int, salt: String, hash: String)
+    +getAlgorithm(): String
+    +getIterations(): int
+    +getSalt(): String
+    +getHash(): String
+}
+
+' PBKDF2 password hasher
+class PBKDF2Hasher {
+    -KEY_LENGTH: int
+    -DEFAULT_ITERATIONS: int
+    -SALT_LENGTH: int
+    +generateSalt(): byte[]
+    +hashPassword(password: char[], salt: byte[], iterations: int): HashedPassword
+    +defaultHashPassword(password: char[]): HashedPassword
+    +verifyPassword(password: char[], stored: HashedPassword): boolean
+}
+
+' Vault storage
+class VaultStorage {
+    -vaultFolder: Path
+    -masterKeyFile: Path
+    +exists(): boolean
+    +saveMasterKey(algorithm: String, iterations: int, salt: String, hash: String): void
+    +loadMasterKey(): String
+    +loadHashedPassword(): HashedPassword
+}
+
+' Password validator
+class PasswordValidator {
+    -MIN_LENGTH: int
+    -BLACKLIST: char[][]
+    -equalsIgnoreCase(a: char[], b: char[]): boolean
+    -countUniquesAsciiBuckets(pwd: char[]): int
+    -hasSimpleAscendingSequence(pwd: char[], win: int): boolean
+    +validate(pwd: char[]): ValidationResult
+}
+
+' Validation result
+class ValidationResult {
+    -ok: boolean
+    -messages: List<String>
+    +ValidationResult(ok: boolean, messages: List<String>)
+    +ok(): boolean
+    +messages(): List<String>
+}
+
+' Relationships
+Main --> PBKDF2Hasher : uses
+Main --> VaultStorage : uses
+Main --> PasswordValidator : uses
+Main --> ValidationResult : uses
+PBKDF2Hasher --> HashedPassword : creates/returns
+VaultStorage --> HashedPassword : creates/returns
+PasswordValidator --> ValidationResult : returns
+
+@enduml
