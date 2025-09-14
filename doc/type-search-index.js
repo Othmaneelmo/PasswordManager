@@ -1,1 +1,1 @@
-typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html"},{"p":"<Unnamed>","l":"Main"}];updateSearchResults();
+typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html"},{"p":"<Unnamed>","l":"HashedPassword"},{"p":"<Unnamed>","l":"Main"},{"p":"<Unnamed>","l":"Menu"},{"p":"<Unnamed>","l":"PasswordValidator"},{"p":"<Unnamed>","l":"PBKDF2Hasher"},{"p":"<Unnamed>","l":"ValidationResult"},{"p":"<Unnamed>","l":"VaultSession"},{"p":"<Unnamed>","l":"VaultStorage"}];updateSearchResults();
