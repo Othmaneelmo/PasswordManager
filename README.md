@@ -14,7 +14,7 @@ javadoc *.java -d doc
 Or in a terminal:
 
 ```bash
-open doc\index.html
+open doc/index.html
 ```
 
 
