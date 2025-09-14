@@ -1,3 +1,4 @@
+import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -51,5 +52,17 @@ public class PBKDF2Hasher {
          * No need for constant-time equals — timing attacks are unrealistic with PBKDF2.
          */
 
+    }
+
+    //derive raw key bytes for session use
+    public static byte[] deriveKey(char[] password, HashedPassword stored)
+    throws NoSuchAlgorithmException, InvalidKeySpecException
+    {
+        byte[] salt = Base64.getDecoder().decode(stored.getSalt());
+        PBEKeySpec spec = new PBEKeySpec(password, salt, stored.getIterations(), KEY_LENGTH);
+        SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+        byte[] key = skf.generateSecret(spec).getEncoded();
+        spec.clearPassword();
+        return key;
     }
 }

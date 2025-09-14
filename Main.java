@@ -112,9 +112,9 @@ public class Main {
             System.out.println("Master key saved to vault!");
         } else {
           //below overwrites masterkey.json, current raw masterkey: password123@
-            VaultStorage.saveMasterKey(encodedHash.getAlgorithm(), encodedHash.getIterations(), encodedHash.getSalt(), encodedHash.getHash());
-            System.out.println("Master key saved to vault!");
-          //System.out.println("Master key already exists — not overwriting.");
+            //VaultStorage.saveMasterKey(encodedHash.getAlgorithm(), encodedHash.getIterations(), encodedHash.getSalt(), encodedHash.getHash());
+            //System.out.println("Master key saved to vault!");
+            System.out.println("Master key already exists — not overwriting.");
         }
 
     } catch (NoSuchAlgorithmException e) {
@@ -140,6 +140,10 @@ public class Main {
 
         if(sameMasterKey){
           System.out.println("same masterKey inputted: Good!");
+          byte[] sessionKey = PBKDF2Hasher.deriveKey(masterKeyVerification, stored);
+          VaultSession.unlock(sessionKey);
+          Arrays.fill(sessionKey, (byte) 0); // clear temp copy
+          System.out.println("Vault is now unlocked!");
         }else{
           System.out.println("Wrong masterKey, or Something went Wrong!");
         }
