@@ -1,55 +1,32 @@
 
-/* KEEP IN MIND
- * 1. Avoid converting the password to a String — Keep it as a char[] to improve security.
- * 2. Clear the password array after use to avoid it lingering in memory.
-*/
-/* TODO (Project Security Plan):
- *
- * 1. Implement password verification:
- *    - On login, load salt + iteration count + hash from storage.
- *    - Run PBKDF2 with the same parameters on the entered password.
- *    - Keep derived encryption key only in memory after unlock.
- *
- * 2. Update storage format:
- *    - Save hash, salt, iteration count per master key.
- *    - Store encrypted account passwords (AES-GCM recommended) with IVs.
- *    - Consider a formatVersion/algorithmVersion field for future upgrades.
- *
- * 3. Add CLI menu (top-level interface):
- *        [1] Set/Reset Master Key       # Create or change the vault's master key
- *        [2] Unlock Vault               # Authenticate to access stored passwords
- *        [3] Add Account Password       # Store account name + password (encrypted)
- *        [4] List Accounts              # Show saved account names (but not passwords)
- *        [5] Retrieve Account Password  # Decrypt & show password for chosen account
- *        [6] Encrypt a File             # Bonus: encrypt file with derived key
- *        [7] Decrypt a File             # Bonus: decrypt file with derived key
- *        [0] Exit
- *
- * 4. Project structure / utilities:
- *    - Plan storage location (file, JSON, or SQLite) for hashes + encrypted data.
- *    - Ensure secure random generation for salts, IVs, etc.
- *
- * 5. Testing:
- *    - Verify password hashing and verification.
- *    - Verify encryption/decryption of account passwords and files.
- *    - Test edge cases (empty/long passwords, invalid input).
- *    - Ensure login/unlock is reasonably fast (< 1 second).
- *
- * 6. Logging / safety:
- *    - Do not log sensitive data (plaintext passwords, keys, hashes).
- *    - Use logging only for general program flow/debug info.
- *
- * Note: PBKDF2 is secure enough for this learning project. No need to add Argon2 or other KDFs.
- */
-
-
 import java.io.Console;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
+/**
+ * Main entry point for the Vault application.
+ * <p>
+ * Handles creation and verification of the master key using PBKDF2 hashing,
+ * and manages unlocking the vault session.
+ * </p>
+ * <p>
+ * Passwords are handled as {@code char[]} arrays to reduce memory exposure,
+ * and are cleared from memory immediately after use.
+ * </p>
+ */
 
 public class Main {
+  /**
+   * Application entry point.
+   * <p>
+   * Prompts the user to create a master key, validates it, hashes it using PBKDF2,
+   * stores it securely, and allows verification to unlock the vault session.
+   * </p>
+   *
+   * @param args Command-line arguments (ignored)
+   * @throws IOException If reading or writing vault storage fails
+   */
   public static void main(String[] args) throws IOException {
 /*
     using char array then converting to string because:
