@@ -1,4 +1,3 @@
-import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -109,8 +108,8 @@ public class PBKDF2Hasher {
         byte[] salt = Base64.getDecoder().decode(stored.getSalt());
         PBEKeySpec spec = new PBEKeySpec(password, salt, stored.getIterations(), KEY_LENGTH);
         SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-        byte[] key = skf.generateSecret(spec).getEncoded();
+        byte[] sessionKey = skf.generateSecret(spec).getEncoded();
         spec.clearPassword();
-        return key;
+        return sessionKey;
     }
 }
