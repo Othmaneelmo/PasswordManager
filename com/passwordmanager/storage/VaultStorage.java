@@ -213,3 +213,21 @@ public final class VaultStorage {
         validateBase64(salt, "salt");
         validateBase64(hash, "hash");
     }
+
+    /**
+     * Builds JSON string for master key storage.
+     */
+    private static String buildMasterKeyJson(String algorithm, int iterations, String salt, String hash) {
+        return String.format(
+            "{\n" +
+            "  \"algorithm\": \"%s\",\n" +
+            "  \"iterations\": %d,\n" +
+            "  \"salt\": \"%s\",\n" +
+            "  \"hash\": \"%s\"\n" +
+            "}",
+            escapeJsonString(algorithm),
+            iterations,
+            escapeJsonString(salt),
+            escapeJsonString(hash)
+        );
+    }
