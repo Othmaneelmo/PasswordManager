@@ -67,34 +67,40 @@ public final class VaultStorage {
     /**
      * Saves the master key's PBKDF2 parameters and hash to persistent storage.
      * <p>
-     * Creates the vault folder if it does not exist. The JSON structure is manually built.
+     * Creates the vault folder if it does not exist. The JSON structure is manually built
+     * to avoid external dependencies. File permissions are set to restrict access where supported.
+     * </p>
+     * <p>
+     * <b>Security Note:</b> This method stores only authentication metadata. It does NOT
+     * store derived keys or plaintext passwords.
      * </p>
      *
-     * @param algorithm  the key derivation algorithm used
+     * @param algorithm  the key derivation algorithm used (e.g., "PBKDF2WithHmacSHA256")
      * @param iterations the number of PBKDF2 iterations
      * @param salt       the Base64-encoded random salt
      * @param hash       the Base64-encoded derived key
      * @throws IOException if writing to the vault file fails
+     * @throws IllegalArgumentException if any parameter is null or invalid
      */
-    public static void saveMasterKey(String algorithm, int iterations, String salt, String hash) throws IOException {
+    public static void saveMasterKey(String algorithm, int iterations, String salt, String hash) 
+            throws IOException {
+        
+        validateSaveInputs(algorithm, iterations, salt, hash);
+
         // Ensure Vault folder exists
-        if (!Files.exists(vaultFolder)) {
-            Files.createDirectories(vaultFolder);
+        if (!Files.exists(VAULT_FOLDER)) {
+            Files.createDirectories(VAULT_FOLDER);
+            restrictFolderPermissions(VAULT_FOLDER);
         }
 
-        // Build minimal JSON string manually (no library yet)
-        String json = String.format(
-            "{\n" +
-            "  \"algorithm\": \"%s\",\n" +
-            "  \"iterations\": %d,\n" +
-            "  \"salt\": \"%s\",\n" +
-            "  \"hash\": \"%s\"\n" +
-            "}",
-            algorithm, iterations, salt, hash
-        );
+        // Build minimal JSON string manually (no library dependency)
+        String json = buildMasterKeyJson(algorithm, iterations, salt, hash);
 
-        // Write JSON to file
-        Files.writeString(masterKeyFile, json);
+        // Write JSON to file atomically
+        Files.writeString(MASTER_KEY_FILE, json);
+        
+        // Restrict file permissions where supported
+        restrictFilePermissions(MASTER_KEY_FILE);
     }
 
     /**
