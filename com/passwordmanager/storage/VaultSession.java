@@ -38,8 +38,8 @@ import javax.crypto.spec.SecretKeySpec;
  * </ul>
  */
 public class VaultSession{
-    private static boolean unlocked = false;
-    private static SecretKey vaultSessionKey = null;
+    private static volatile boolean unlocked = false;
+    private static volatile SecretKey vaultSessionKey = null;
 
 
 
