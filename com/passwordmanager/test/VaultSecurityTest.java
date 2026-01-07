@@ -49,6 +49,14 @@ public class VaultSecurityTest {
 
             Arrays.fill(pwd, ' ');
         });
+
+        test("Salt uniqueness", () -> {
+            byte[] salt1 = PBKDF2Hasher.generateSalt();
+            byte[] salt2 = PBKDF2Hasher.generateSalt();
+
+            assertFalse(Arrays.equals(salt1, salt2),
+                    "Two generated salts should be different");
+        });
     }
 
     private static void test(String name, TestRunnable runnable) {
