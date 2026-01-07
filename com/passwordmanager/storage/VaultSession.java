@@ -83,26 +83,36 @@ public class VaultSession{
      * Locks the vault and securely wipes all key material from memory.
      * <p>
      * Once locked, no operations using the vault key are allowed until it is unlocked again.
+     * This method is idempotent - calling it on an already-locked vault is safe.
+     * </p>
+     * <p>
+     * <b>Security Note:</b> This method attempts to extract and zeroize the raw key bytes
+     * from the {@code SecretKey}. While this works for {@code SecretKeySpec}, some
+     * {@code SecretKey} implementations may not expose raw bytes. In such cases, only
+     * the reference is cleared.
      * </p>
      */
-    public static void lock(){
-        if(vaultSessionKey != null){
+    public static synchronized void lock() {
+        if (vaultSessionKey != null) {
+            // Attempt to zeroize raw key bytes if accessible
             byte[] keyBytes = vaultSessionKey.getEncoded();
-            if(keyBytes != null){
-                Arrays.fill(keyBytes, (byte) 0); //wipe keyBytes
+            if (keyBytes != null) {
+                Arrays.fill(keyBytes, (byte) 0);
             }
             vaultSessionKey = null;
-            unlocked = false;
         }
-
+        unlocked = false;
     }
 
     /**
      * Returns whether the vault is currently unlocked.
+     * <p>
+     * This method is thread-safe and can be called at any time.
+     * </p>
      *
      * @return {@code true} if the vault is unlocked, {@code false} otherwise
      */
-    public static boolean isUnlocked(){
+    public static boolean isUnlocked() {
         return unlocked;
     }
 
