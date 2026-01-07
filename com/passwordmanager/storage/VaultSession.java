@@ -5,20 +5,44 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * Manages the unlocked state of the vault.
+ * Manages the unlocked state of the vault as a strict state machine.
  * <p>
- * The vault is locked by default. When unlocked, it holds the derived AES key in memory.
- * When locked, the key is securely wiped and no operations are allowed.
+ * <b>State Transitions:</b>
  * </p>
+ * <pre>
+ * [LOCKED] --unlock(keyBytes)--> [UNLOCKED]
+ * [UNLOCKED] --lock()--> [LOCKED]
+ * </pre>
  * <p>
- * This class uses static methods and variables to represent a single global vault session.
- * All key material is cleared from memory whenever the vault is locked.
+ * <b>Invariants:</b>
  * </p>
+ * <ul>
+ *   <li>The vault is LOCKED by default</li>
+ *   <li>When LOCKED, {@code vaultSessionKey} is {@code null}</li>
+ *   <li>When UNLOCKED, {@code vaultSessionKey} contains a valid AES-256 key</li>
+ *   <li>Calling {@code unlock()} when already unlocked throws {@code IllegalStateException}</li>
+ *   <li>Calling {@code getVaultSessionKey()} when locked throws {@code IllegalStateException}</li>
+ *   <li>All key material is zeroized on {@code lock()}</li>
+ * </ul>
+ * <p>
+ * This class uses static methods to represent a single global vault session.
+ * In future versions, this could be refactored to support multiple vault instances.
+ * </p>
+ * 
+ * <p><b>Security Guarantees:</b></p>
+ * <ul>
+ *   <li>Session keys exist in memory only while vault is unlocked</li>
+ *   <li>Keys are zeroized immediately upon locking</li>
+ *   <li>No operations possible on locked vault</li>
+ *   <li>State transitions are atomic and fail-safe</li>
+ * </ul>
  */
 public class VaultSession{
     private static boolean unlocked = false;
     private static SecretKey vaultSessionKey = null;
-    
+
+
+
     /**
      * Unlocks the vault using the provided key bytes.
      * <p>
