@@ -1,17 +1,16 @@
 package com.passwordmanager.main;
 
+import com.passwordmanager.security.HashedPassword;
+import com.passwordmanager.security.PBKDF2Hasher;
+import com.passwordmanager.storage.VaultSession;
+import com.passwordmanager.storage.VaultStorage;
+import com.passwordmanager.validation.PasswordValidator;
+import com.passwordmanager.validation.ValidationResult;
 import java.io.Console;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
-
-import com.passwordmanager.security.HashedPassword;
-import com.passwordmanager.security.PBKDF2Hasher;
-import com.passwordmanager.storage.VaultStorage;
-import com.passwordmanager.storage.VaultSession;
-import com.passwordmanager.validation.PasswordValidator;
-import com.passwordmanager.validation.ValidationResult;
 
 /**
  * Main entry point for the Vault application.
@@ -36,7 +35,8 @@ public class Main {
    * @param args Command-line arguments (ignored)
    * @throws IOException If reading or writing vault storage fails
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) {
+    try {
 /*
     using char array then converting to string because:
         - String are immutable, they are saved in memory
@@ -81,17 +81,8 @@ public class Main {
         
     try {
         HashedPassword encodedHash = PBKDF2Hasher.defaultHashPassword(masterKeyChars);
-        
-        /*
-        Below  prints out algorithm:iterations:salt:hash in console
-        REMOVE LATER
-        */ 
-        String printOutHashInfo = encodedHash.getAlgorithm() + ":" + encodedHash.getIterations() + ":" + encodedHash.getSalt() + ":" + encodedHash.getHash();
-        System.out.println("PBKDF2 hash generated and stored:");
-        System.out.println(printOutHashInfo);
 
         /*TODO: store hash + encodedsalt + iterations securely*/
-        System.out.println("PBKDF2 hash generated successfully!");
 
         if (!VaultStorage.exists()) {
             VaultStorage.saveMasterKey(encodedHash.getAlgorithm(), encodedHash.getIterations(), encodedHash.getSalt(), encodedHash.getHash());
