@@ -215,6 +215,11 @@ public class VaultSecurityTest {
     // ==================== STATE MACHINE TESTS ====================
     private static void runStateMachineTests() {
         printCategory("STATE MACHINE INVARIANTS");
+
+        test("Vault starts locked", () -> {
+            assertFalse(VaultSession.isUnlocked(), "Vault should start in locked state");
+            assertEquals("LOCKED", VaultSession.getState(), "State should be LOCKED");
+        });
     }
 
     private static void test(String name, TestRunnable runnable) {
