@@ -5,6 +5,7 @@ import com.passwordmanager.security.PBKDF2Hasher;
 import com.passwordmanager.storage.VaultSession;
 import com.passwordmanager.storage.VaultStorage;
 import java.util.Arrays;
+import java.util.Base64;
 
 /**
  * Advanced test suite for the password manager vault core.
@@ -116,6 +117,19 @@ public class VaultSecurityTest {
             
             Arrays.fill(pwd, ' ');
             Arrays.fill(key, (byte) 0);
+        });
+                test("Hash output is Base64 encoded", () -> {
+            char[] pwd = "base64Test".toCharArray();
+            HashedPassword stored = PBKDF2Hasher.defaultHashPassword(pwd);
+            
+            try {
+                byte[] decoded = Base64.getDecoder().decode(stored.getHash());
+                assertEquals(32, decoded.length, "Decoded hash should be 32 bytes");
+            } catch (IllegalArgumentException e) {
+                fail("Hash should be valid Base64");
+            }
+            
+            Arrays.fill(pwd, ' ');
         });
     }
 
