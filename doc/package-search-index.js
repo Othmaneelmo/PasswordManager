@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"}];updateSearchResults();
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"com.passwordmanager.main"},{"l":"com.passwordmanager.security"},{"l":"com.passwordmanager.storage"},{"l":"com.passwordmanager.validation"}];updateSearchResults();
