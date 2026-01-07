@@ -93,39 +93,72 @@ public final class PBKDF2Hasher {
 
     /**
      * Hashes a password using default salt and iteration constants.
+     * <p>
+     * Equivalent to calling {@link #hashPassword(char[], byte[], int)} with
+     * a freshly generated salt and {@value #DEFAULT_ITERATIONS} iterations.
+     * </p>
      *
      * @param password the password to hash
      * @return a {@link HashedPassword} with default parameters
      * @throws NoSuchAlgorithmException if PBKDF2WithHmacSHA256 is not available
      * @throws InvalidKeySpecException  if the key specification is invalid
+     * @throws IllegalArgumentException if password is null or empty
      */
     public static HashedPassword defaultHashPassword(char[] password)
-    throws NoSuchAlgorithmException, InvalidKeySpecException
-    {
+            throws NoSuchAlgorithmException, InvalidKeySpecException {
+        
+        if (password == null || password.length == 0) {
+            throw new IllegalArgumentException("Password cannot be null or empty");
+        }
+        
         byte[] salt = generateSalt();
         return hashPassword(password, salt, DEFAULT_ITERATIONS);
     }
 
     /**
      * Verifies whether a password matches a previously stored {@link HashedPassword}.
+     * <p>
+     * This method performs a <b>constant-time comparison</b> of the derived hash to prevent
+     * timing attacks. However, note that PBKDF2's high iteration count already makes
+     * timing attacks impractical in most scenarios.
+     * </p>
      *
      * @param password the password to verify
      * @param stored   the stored hashed password to check against
      * @return {@code true} if the password matches, {@code false} otherwise
      * @throws NoSuchAlgorithmException if PBKDF2WithHmacSHA256 is not available
      * @throws InvalidKeySpecException  if the key specification is invalid
+     * @throws IllegalArgumentException if password or stored is null
      */
     public static boolean verifyPassword(char[] password, HashedPassword stored)
-    throws NoSuchAlgorithmException, InvalidKeySpecException
-    {
-        byte[] salt = Base64.getDecoder().decode(stored.getSalt());
-        HashedPassword testHp = hashPassword(password, salt, stored.getIterations());
-        return testHp.getHash().equals(stored.getHash());
-        /*
-         * Only using ".equals":
-         * No need for constant-time equals — timing attacks are unrealistic with PBKDF2.
-         */
+            throws NoSuchAlgorithmException, InvalidKeySpecException {
+        
+        if (password == null) {
+            throw new IllegalArgumentException("Password cannot be null");
+        }
+        if (stored == null) {
+            throw new IllegalArgumentException("Stored hash cannot be null");
+        }
 
+        byte[] salt = Base64.getDecoder().decode(stored.getSalt());
+        byte[] storedHash = Base64.getDecoder().decode(stored.getHash());
+        PBEKeySpec spec = new PBEKeySpec(password, salt, stored.getIterations(), KEY_LENGTH_BITS);
+        byte[] testHash = null;
+        
+        try {
+            SecretKeyFactory factory = SecretKeyFactory.getInstance(stored.getAlgorithm());
+            testHash = factory.generateSecret(spec).getEncoded();
+            
+            return constantTimeEquals(testHash, storedHash);
+            
+        } finally {
+            spec.clearPassword();
+            if (testHash != null) {
+                Arrays.fill(testHash, (byte) 0);
+            }
+            Arrays.fill(salt, (byte) 0);
+            Arrays.fill(storedHash, (byte) 0);
+        }
     }
 
     /**
