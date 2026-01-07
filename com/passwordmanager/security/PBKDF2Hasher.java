@@ -37,6 +37,9 @@ public final class PBKDF2Hasher {
     private static final int DEFAULT_ITERATIONS = 600_000;
     private static final int SALT_LENGTH_BYTES = 16;
 
+    private static final int MIN_ITERATIONS = 100_000;
+    private static final int MAX_ITERATIONS = 10_000_000;
+
     // Private constructor prevents instantiation
     private PBKDF2Hasher() {
         throw new AssertionError("Utility class should not be instantiated");
@@ -71,7 +74,7 @@ public final class PBKDF2Hasher {
      * @return a {@link HashedPassword} containing the algorithm, iterations, salt, and hash
      * @throws NoSuchAlgorithmException if PBKDF2WithHmacSHA256 is not available
      * @throws InvalidKeySpecException  if the key specification is invalid
-     * @throws IllegalArgumentException if password is null/empty, salt is null, or iterations < 1
+     * @throws IllegalArgumentException if password is null/empty, salt is null, or iterations out of range
      */
     public static HashedPassword hashPassword(char[] password, byte[] salt, int iterations)
             throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -135,7 +138,7 @@ public final class PBKDF2Hasher {
      * @return {@code true} if the password matches, {@code false} otherwise
      * @throws NoSuchAlgorithmException if PBKDF2WithHmacSHA256 is not available
      * @throws InvalidKeySpecException  if the key specification is invalid
-     * @throws IllegalArgumentException if password or stored is null
+     * @throws IllegalArgumentException if password or stored is null, or iteration count invalid
      */
     public static boolean verifyPassword(char[] password, HashedPassword stored)
             throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -146,10 +149,18 @@ public final class PBKDF2Hasher {
         if (stored == null) {
             throw new IllegalArgumentException("Stored hash cannot be null");
         }
+        
+        int iterations = stored.getIterations();
+        if (iterations < MIN_ITERATIONS || iterations > MAX_ITERATIONS) {
+            throw new IllegalArgumentException(
+                "Stored iteration count out of allowed range (" +
+                MIN_ITERATIONS + "–" + MAX_ITERATIONS + "): " + iterations
+            );
+        }
 
         byte[] salt = Base64.getDecoder().decode(stored.getSalt());
         byte[] storedHash = Base64.getDecoder().decode(stored.getHash());
-        PBEKeySpec spec = new PBEKeySpec(password, salt, stored.getIterations(), KEY_LENGTH_BITS);
+        PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, KEY_LENGTH_BITS);
         byte[] testHash = null;
         
         try {
@@ -190,7 +201,7 @@ public final class PBKDF2Hasher {
      * @return a byte array containing the derived session key (256 bits)
      * @throws NoSuchAlgorithmException if PBKDF2WithHmacSHA256 is not available
      * @throws InvalidKeySpecException  if the key specification is invalid
-     * @throws IllegalArgumentException if password or stored is null
+     * @throws IllegalArgumentException if password or stored is null, or iteration count invalid
      */
     public static byte[] deriveSessionKey(char[] password, HashedPassword stored)
             throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -202,8 +213,16 @@ public final class PBKDF2Hasher {
             throw new IllegalArgumentException("Stored hash cannot be null");
         }
 
+        int iterations = stored.getIterations();
+        if (iterations < MIN_ITERATIONS || iterations > MAX_ITERATIONS) {
+            throw new IllegalArgumentException(
+                "Stored iteration count out of allowed range (" +
+                MIN_ITERATIONS + "–" + MAX_ITERATIONS + "): " + iterations
+            );
+        }
+
         byte[] salt = Base64.getDecoder().decode(stored.getSalt());
-        PBEKeySpec spec = new PBEKeySpec(password, salt, stored.getIterations(), KEY_LENGTH_BITS);
+        PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, KEY_LENGTH_BITS);
         
         try {
             SecretKeyFactory factory = SecretKeyFactory.getInstance(stored.getAlgorithm());
@@ -251,8 +270,11 @@ public final class PBKDF2Hasher {
         if (salt == null) {
             throw new IllegalArgumentException("Salt cannot be null");
         }
-        if (iterations < 1) {
-            throw new IllegalArgumentException("Iterations must be positive");
+        if (iterations < MIN_ITERATIONS || iterations > MAX_ITERATIONS) {
+            throw new IllegalArgumentException(
+                "Iteration count out of allowed range (" +
+                MIN_ITERATIONS + "–" + MAX_ITERATIONS + "): " + iterations
+            );
         }
     }
 }
