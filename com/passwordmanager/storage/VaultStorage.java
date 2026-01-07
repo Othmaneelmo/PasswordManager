@@ -105,15 +105,25 @@ public final class VaultStorage {
 
     /**
      * Loads the raw JSON content of the master key file.
+     * <p>
+     * This method performs basic validation to ensure the file is not empty or corrupted.
+     * </p>
      *
      * @return the JSON string, or {@code null} if the file does not exist
-     * @throws IOException if reading the vault file fails
+     * @throws IOException if reading the vault file fails or the file is corrupted
      */
     public static String loadMasterKey() throws IOException {
-        if (!Files.exists(masterKeyFile)) {
+        if (!Files.exists(MASTER_KEY_FILE)) {
             return null;
         }
-        return Files.readString(masterKeyFile).trim();
+        
+        String json = Files.readString(MASTER_KEY_FILE).trim();
+        
+        if (json.isEmpty()) {
+            throw new IOException("Master key file is empty or corrupted");
+        }
+        
+        return json;
     }
 
     /**
