@@ -1,5 +1,8 @@
 package com.passwordmanager.test;
 
+import com.passwordmanager.storage.VaultSession;
+import com.passwordmanager.storage.VaultStorage;
+
 /**
  * Advanced test suite for the password manager vault core.
  *
@@ -19,6 +22,7 @@ public class VaultSecurityTest {
         System.out.println();
 
         // Example usage placeholder
+        // cleanupVault();
         // printCategory("EXAMPLE CATEGORY");
         // test("Example test", () -> assertTrue(true, "Example"));
 
@@ -55,6 +59,17 @@ public class VaultSecurityTest {
         System.out.println("─".repeat(80));
         System.out.println("  " + category);
         System.out.println("─".repeat(80));
+    }
+
+    private static void cleanupVault() {
+        try {
+            VaultSession.lock();
+            if (VaultStorage.exists()) {
+                VaultStorage.deleteVault();
+            }
+        } catch (Exception e) {
+            // Ignore cleanup errors
+        }
     }
 
     private static void assertTrue(boolean condition, String message) {
