@@ -220,6 +220,27 @@ public class VaultSecurityTest {
             assertFalse(VaultSession.isUnlocked(), "Vault should start in locked state");
             assertEquals("LOCKED", VaultSession.getState(), "State should be LOCKED");
         });
+
+        test("Cannot unlock twice", () -> {
+            char[] pwd = "doubleUnlock".toCharArray();
+            HashedPassword stored = PBKDF2Hasher.defaultHashPassword(pwd);
+            byte[] key = PBKDF2Hasher.deriveSessionKey(pwd, stored);
+            
+            VaultSession.unlock(key);
+            
+            try {
+                byte[] key2 = PBKDF2Hasher.deriveSessionKey(pwd, stored);
+                VaultSession.unlock(key2);
+                fail("Should not be able to unlock twice");
+                Arrays.fill(key2, (byte) 0);
+            } catch (IllegalStateException e) {
+                // Expected
+            }
+            
+            VaultSession.lock();
+            Arrays.fill(pwd, ' ');
+            Arrays.fill(key, (byte) 0);
+        });
     }
 
     private static void test(String name, TestRunnable runnable) {
