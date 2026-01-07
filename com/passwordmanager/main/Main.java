@@ -101,25 +101,45 @@ public class Main {
 
                 boolean verified = PBKDF2Hasher.verifyPassword(masterKeyVerification, stored);
 
-        if(sameMasterKey){
-          System.out.println("same masterKey inputted: Good!");
-          byte[] sessionKey = PBKDF2Hasher.deriveKey(masterKeyVerification, stored);
-          VaultSession.unlock(sessionKey);
-          Arrays.fill(sessionKey, (byte) 0); // clear temp copy
-          System.out.println("Vault is now unlocked!");
-        }else{
-          System.out.println("Wrong masterKey, or Something went Wrong!");
-        }
-        Arrays.fill(masterKeyVerification, ' ');  //cleanUp
-      
-      }catch(IOException IOErr){
-        System.out.println("Error reading vault: " + IOErr.getMessage());
-      }catch(NoSuchAlgorithmException algoErr){
-        System.out.println("Cannot find Used Algorithm: " + algoErr.getMessage());
-      }catch(InvalidKeySpecException keySpecErr){
-        System.out.println("Key Spec error: " + keySpecErr.getMessage());
-      }
-    }
+                if (verified) {
+                    System.out.println("✓ Master key verified!");
+                    
+                    // Derive session key and unlock vault
+                    byte[] sessionKey = PBKDF2Hasher.deriveSessionKey(masterKeyVerification, stored);
+                    
+                    try {
+                        VaultSession.unlock(sessionKey);
+                        System.out.println("✓ Vault is now unlocked! State: " + VaultSession.getState());
+                        
+                        // Demonstrate that we can access the session key
+                        if (VaultSession.isUnlocked()) {
+                            System.out.println("✓ Session key is accessible for cryptographic operations.");
+                        }
+                        
+                        // Lock the vault when done
+                        VaultSession.lock();
+                        System.out.println("✓ Vault locked. State: " + VaultSession.getState());
+                        
+                    } finally {
+                        // Always zeroize session key
+                        Arrays.fill(sessionKey, (byte) 0);
+                    }
+                    
+                } else {
+                    System.out.println("✗ Wrong master key!");
+                }
+                
+                Arrays.fill(masterKeyVerification, ' ');
 
-  }
+            } catch (IOException ioErr) {
+                System.out.println("Error reading vault: " + ioErr.getMessage());
+            } catch (NoSuchAlgorithmException algoErr) {
+                System.out.println("Cannot find used algorithm: " + algoErr.getMessage());
+            } catch (InvalidKeySpecException keySpecErr) {
+                System.out.println("Key spec error: " + keySpecErr.getMessage());
+            } catch (IllegalStateException stateErr) {
+                System.out.println("Vault state error: " + stateErr.getMessage());
+            }
+        }
+    }
 }
