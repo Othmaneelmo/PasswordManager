@@ -1,0 +1,51 @@
+@startuml Sequence Diagram
+
+title PasswordManager Sequence Diagram - Master Key Setup and Unlock
+
+actor User
+participant Main
+participant PasswordValidator
+participant ValidationResult
+participant PBKDF2Hasher
+participant HashedPassword
+participant VaultStorage
+participant VaultSession
+
+User -> Main: Enter master key
+Main -> PasswordValidator: validate(masterKeyChars)
+PasswordValidator -> ValidationResult: new ValidationResult(ok, messages)
+ValidationResult --> PasswordValidator: return ValidationResult
+PasswordValidator --> Main: return ValidationResult
+
+alt password valid
+    Main -> PBKDF2Hasher: defaultHashPassword(masterKeyChars)
+    PBKDF2Hasher -> HashedPassword: new HashedPassword(...)
+    HashedPassword --> PBKDF2Hasher: return HashedPassword
+    PBKDF2Hasher --> Main: return HashedPassword
+
+    Main -> VaultStorage: saveMasterKey(algorithm, iterations, salt, hash)
+    VaultStorage --> Main: save completed
+
+    User -> Main: Re-enter master key for verification
+    Main -> VaultStorage: loadHashedPassword()
+    VaultStorage -> HashedPassword: load from JSON
+    HashedPassword --> VaultStorage: return HashedPassword
+    VaultStorage --> Main: return HashedPassword
+
+    Main -> PBKDF2Hasher: verifyPassword(masterKeyVerification, stored)
+    PBKDF2Hasher --> Main: return true/false
+
+    alt verification successful
+        Main -> PBKDF2Hasher: deriveKey(masterKeyVerification, stored)
+        PBKDF2Hasher --> Main: return sessionKey
+        Main -> VaultSession: unlock(sessionKey)
+        VaultSession --> Main: vault unlocked
+        Main --> User: Vault is now unlocked!
+    else verification failed
+        Main --> User: Wrong master key
+    end
+else password invalid
+    Main --> User: Password not strong enough
+end
+
+@enduml
