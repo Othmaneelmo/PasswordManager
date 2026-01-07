@@ -8,6 +8,10 @@ package com.passwordmanager.test;
  */
 public class VaultSecurityTest {
 
+    private static int testsRun = 0;
+    private static int testsPassed = 0;
+    private static int testsFailed = 0;
+
     public static void main(String[] args) {
         // Test execution entry point
     }
