@@ -371,6 +371,15 @@ public class VaultSecurityTest {
             assertNull(loaded, "Loading non-existent vault should return null");
         });
 
+        test("Reject invalid algorithm", () -> {
+            try {
+                VaultStorage.saveMasterKey("", 100000, "validSalt==", "validHash==");
+                fail("Should reject empty algorithm");
+            } catch (IllegalArgumentException e) {
+                // Expected
+            }
+        });
+
     }
 
     private static void test(String name, TestRunnable runnable) {
