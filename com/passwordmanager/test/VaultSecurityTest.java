@@ -174,6 +174,19 @@ public class VaultSecurityTest {
             
             Arrays.fill(pwd, ' ');
         });
+
+        test("Caller responsibility for password clearing", () -> {
+            char[] pwd = "callerTest".toCharArray();
+            HashedPassword hp = PBKDF2Hasher.defaultHashPassword(pwd);
+            
+            // Caller must clear
+            Arrays.fill(pwd, ' ');
+            
+            // Verify cleared
+            for (char c : pwd) {
+                assertEquals(' ', c, "Password array should be cleared by caller");
+            }
+        });
     
     }
     private static void test(String name, TestRunnable runnable) {
