@@ -137,6 +137,27 @@ public class VaultSecurityTest {
 
     private static void runMemorySafetyTests() {
         printCategory("MEMORY SAFETY");
+
+        test("Session key zeroization on lock", () -> {
+            char[] pwd = "zeroizeTest".toCharArray();
+            HashedPassword stored = PBKDF2Hasher.defaultHashPassword(pwd);
+            byte[] key = PBKDF2Hasher.deriveSessionKey(pwd, stored);
+            
+            VaultSession.unlock(key);
+            byte[] keyBeforeLock = VaultSession.getVaultSessionKey().getEncoded();
+            VaultSession.lock();
+            
+            // After lock, we can't access the key anymore
+            try {
+                VaultSession.getVaultSessionKey();
+                fail("Should not be able to access key after lock");
+            } catch (IllegalStateException e) {
+                // Expected
+            }
+            
+            Arrays.fill(pwd, ' ');
+            Arrays.fill(key, (byte) 0);
+        });
     
     }
     private static void test(String name, TestRunnable runnable) {
