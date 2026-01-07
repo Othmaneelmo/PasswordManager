@@ -293,6 +293,25 @@ public class VaultSecurityTest {
             Arrays.fill(key2, (byte) 0);
         });
 
+        test("Key must be exactly 32 bytes", () -> {
+            byte[] shortKey = new byte[16];
+            byte[] longKey = new byte[64];
+            
+            try {
+                VaultSession.unlock(shortKey);
+                fail("Should reject 16-byte key");
+            } catch (IllegalArgumentException e) {
+                // Expected
+            }
+            
+            try {
+                VaultSession.unlock(longKey);
+                fail("Should reject 64-byte key");
+            } catch (IllegalArgumentException e) {
+                // Expected
+            }
+        });
+
     }
 
     private static void test(String name, TestRunnable runnable) {
