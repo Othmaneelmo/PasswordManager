@@ -187,6 +187,24 @@ public class VaultSecurityTest {
                 assertEquals(' ', c, "Password array should be cleared by caller");
             }
         });
+
+        test("Session key zeroization after unlock", () -> {
+            char[] pwd = "unlockZeroTest".toCharArray();
+            HashedPassword stored = PBKDF2Hasher.defaultHashPassword(pwd);
+            byte[] key = PBKDF2Hasher.deriveSessionKey(pwd, stored);
+            
+            VaultSession.unlock(key);
+            
+            // Caller should zeroize the key array after unlock
+            Arrays.fill(key, (byte) 0);
+            
+            for (byte b : key) {
+                assertEquals(0, b, "Session key should be zeroized after use");
+            }
+            
+            VaultSession.lock();
+            Arrays.fill(pwd, ' ');
+        });
     
     }
     private static void test(String name, TestRunnable runnable) {
