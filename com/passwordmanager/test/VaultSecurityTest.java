@@ -536,6 +536,20 @@ public class VaultSecurityTest {
 
     private static void runAttackResistanceTests() {
         printCategory("ATTACK RESISTANCE");
+
+        test("Rainbow table resistance (unique salts)", () -> {
+            char[] pwd = "commonPassword123".toCharArray();
+            
+            HashedPassword h1 = PBKDF2Hasher.defaultHashPassword(pwd);
+            HashedPassword h2 = PBKDF2Hasher.defaultHashPassword(pwd);
+            
+            assertFalse(h1.getSalt().equals(h2.getSalt()), 
+                "Same password should have different salts");
+            assertFalse(h1.getHash().equals(h2.getHash()), 
+                "Same password with different salts should have different hashes");
+            
+            Arrays.fill(pwd, ' ');
+        });
     }
 
     private static void test(String name, TestRunnable runnable) {
