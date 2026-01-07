@@ -1,13 +1,13 @@
 package com.passwordmanager.test;
 
+import com.passwordmanager.security.HashedPassword;
+import com.passwordmanager.security.PBKDF2Hasher;
 import com.passwordmanager.storage.VaultSession;
 import com.passwordmanager.storage.VaultStorage;
+import java.util.Arrays;
 
 /**
  * Advanced test suite for the password manager vault core.
- *
- * This class will host security, correctness, concurrency,
- * and resilience tests for the vault subsystem.
  */
 public class VaultSecurityTest {
 
@@ -37,8 +37,18 @@ public class VaultSecurityTest {
     private static void runCryptographicTests() {
         printCategory("CRYPTOGRAPHIC CORRECTNESS");
 
-        // Individual cryptographic tests will be added here
-        // e.g., test("Hash determinism", () -> { ... });
+        test("Hash determinism", () -> {
+            char[] pwd = "test123@ABC".toCharArray();
+            byte[] salt = PBKDF2Hasher.generateSalt();
+
+            HashedPassword h1 = PBKDF2Hasher.hashPassword(pwd, salt, 100000);
+            HashedPassword h2 = PBKDF2Hasher.hashPassword(pwd, salt, 100000);
+
+            assertTrue(h1.getHash().equals(h2.getHash()),
+                    "Same password + salt + iterations should produce identical hash");
+
+            Arrays.fill(pwd, ' ');
+        });
     }
 
     private static void test(String name, TestRunnable runnable) {
