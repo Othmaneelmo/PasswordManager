@@ -21,10 +21,9 @@ public class VaultSecurityTest {
         System.out.println("=".repeat(80));
         System.out.println();
 
-        // Example usage placeholder
-        // cleanupVault();
-        // printCategory("EXAMPLE CATEGORY");
-        // test("Example test", () -> assertTrue(true, "Example"));
+        cleanupVault();
+
+        runCryptographicTests();
 
         System.out.println();
         System.out.println("=".repeat(80));
@@ -33,6 +32,13 @@ public class VaultSecurityTest {
         System.out.println("Total tests run: " + testsRun);
         System.out.println("Passed: " + testsPassed);
         System.out.println("Failed: " + testsFailed);
+    }
+
+    private static void runCryptographicTests() {
+        printCategory("CRYPTOGRAPHIC CORRECTNESS");
+
+        // Individual cryptographic tests will be added here
+        // e.g., test("Hash determinism", () -> { ... });
     }
 
     private static void test(String name, TestRunnable runnable) {
