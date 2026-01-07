@@ -49,24 +49,46 @@ public final class PBKDF2Hasher {
 
     /**
      * Hashes a password using PBKDF2 with the specified salt and iteration count.
+     * <p>
+     * This method is used for <b>authentication purposes only</b>. The resulting hash
+     * should be stored and used for password verification via {@link #verifyPassword}.
+     * </p>
+     * <p>
+     * <b>Security Note:</b> The password is cleared from the PBEKeySpec after hashing,
+     * but the caller is responsible for clearing the input char[] array.
+     * </p>
      *
      * @param password   the password to hash (char array)
      * @param salt       the salt to use for hashing
-     * @param iterations the number of PBKDF2 iterations
+     * @param iterations the number of PBKDF2 iterations (minimum 100,000 recommended)
      * @return a {@link HashedPassword} containing the algorithm, iterations, salt, and hash
      * @throws NoSuchAlgorithmException if PBKDF2WithHmacSHA256 is not available
      * @throws InvalidKeySpecException  if the key specification is invalid
+     * @throws IllegalArgumentException if password is null/empty, salt is null, or iterations < 1
      */
     public static HashedPassword hashPassword(char[] password, byte[] salt, int iterations)
-    throws NoSuchAlgorithmException, InvalidKeySpecException 
-    {
-        PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, KEY_LENGTH);
-        SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-        byte[] hash = skf.generateSecret(spec).getEncoded();
-        spec.clearPassword(); // wipe sensitive data
+            throws NoSuchAlgorithmException, InvalidKeySpecException {
+        
+        validateHashPasswordInputs(password, salt, iterations);
+
+        PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, KEY_LENGTH_BITS);
+        byte[] hash = null;
+        
+        try {
+            SecretKeyFactory factory = SecretKeyFactory.getInstance(ALGORITHM);
+            hash = factory.generateSecret(spec).getEncoded();
+            
         String encodedSalt = Base64.getEncoder().encodeToString(salt);
         String encodedHash = Base64.getEncoder().encodeToString(hash);
-        return new HashedPassword("PBKDF2WithHmacSHA256", iterations, encodedSalt, encodedHash);
+            
+            return new HashedPassword(ALGORITHM, iterations, encodedSalt, encodedHash);
+            
+        } finally {
+            spec.clearPassword();
+            if (hash != null) {
+                Arrays.fill(hash, (byte) 0);
+            }
+        }
     }
 
     /**
