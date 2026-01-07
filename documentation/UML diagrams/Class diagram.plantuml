@@ -19,14 +19,15 @@ class HashedPassword {
 }
 
 class PBKDF2Hasher {
-  -KEY_LENGTH: int = 256
+  -ALGORITHM: String = "PBKDF2WithHmacSHA256"
+  -KEY_LENGTH_BITS: int = 256
   -DEFAULT_ITERATIONS: int = 600_000
-  -SALT_LENGTH: int = 16
+  -SALT_LENGTH_BYTES: int = 16
   +generateSalt(): byte[]
   +hashPassword(password: char[], salt: byte[], iterations: int): HashedPassword
   +defaultHashPassword(password: char[]): HashedPassword
   +verifyPassword(password: char[], stored: HashedPassword): boolean
-  +deriveKey(password: char[], stored: HashedPassword): byte[]
+  +deriveSessionKey(password: char[], stored: HashedPassword): byte[]
 }
 
 class VaultStorage {
