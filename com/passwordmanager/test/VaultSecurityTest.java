@@ -389,6 +389,15 @@ public class VaultSecurityTest {
             }
         });
 
+        test("Reject invalid Base64 salt", () -> {
+            try {
+                VaultStorage.saveMasterKey("PBKDF2WithHmacSHA256", 100000, "not-base64!", "validHash==");
+                fail("Should reject invalid Base64 salt");
+            } catch (IllegalArgumentException e) {
+                // Expected
+            }
+        });
+
     }
 
     private static void test(String name, TestRunnable runnable) {
