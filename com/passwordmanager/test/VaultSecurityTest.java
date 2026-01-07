@@ -351,6 +351,19 @@ public class VaultSecurityTest {
             
             Arrays.fill(pwd, ' ');
         });
+        test("Vault exists check", () -> {
+            cleanupVault();
+            assertFalse(VaultStorage.exists(), "Vault should not exist initially");
+            
+            char[] pwd = "existsTest".toCharArray();
+            HashedPassword hp = PBKDF2Hasher.defaultHashPassword(pwd);
+            VaultStorage.saveMasterKey(hp.getAlgorithm(), hp.getIterations(), hp.getSalt(), hp.getHash());
+            
+            assertTrue(VaultStorage.exists(), "Vault should exist after save");
+            
+            Arrays.fill(pwd, ' ');
+        });
+        
     }
 
     private static void test(String name, TestRunnable runnable) {
