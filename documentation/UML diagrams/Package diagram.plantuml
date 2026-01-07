@@ -1,0 +1,32 @@
+@startuml Package Diagram
+
+title PasswordManager Package Diagram
+
+package "com.passwordmanager" as com.passwordmanager {
+  package "main" as main {
+    class Main
+  }
+
+  package "security" as security {
+    class HashedPassword
+    class PBKDF2Hasher
+  }
+
+  package "storage" as storage {
+    class VaultStorage
+    class VaultSession
+  }
+
+  package "validation" as validation {
+    class PasswordValidator
+    class ValidationResult
+  }
+}
+
+main --> security : uses
+main --> storage : uses
+main --> validation : uses
+security --> storage : interacts
+validation --> main : returns
+
+@enduml
