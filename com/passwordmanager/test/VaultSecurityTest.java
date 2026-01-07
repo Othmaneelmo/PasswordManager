@@ -37,7 +37,7 @@ public class VaultSecurityTest {
         runStorageTests();
         runConcurrencyTests();
         runAttackResistanceTests();
-        //runEdgeCaseTests();
+        runEdgeCaseTests();
 
         System.out.println();
         System.out.println("=".repeat(80));
@@ -624,6 +624,12 @@ public class VaultSecurityTest {
                 // Also acceptable - rejecting the input
             }
         });
+    }
+
+    // ==================== EDGE CASE TESTS ====================
+
+    private static void runEdgeCaseTests() {
+        printCategory("EDGE CASES");
     }
 
     private static void test(String name, TestRunnable runnable) {
