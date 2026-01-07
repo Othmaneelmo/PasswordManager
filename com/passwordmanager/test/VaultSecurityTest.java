@@ -269,6 +269,30 @@ public class VaultSecurityTest {
             Arrays.fill(key, (byte) 0);
         });
 
+        test("Unlock -> Lock -> Unlock cycle", () -> {
+            char[] pwd = "cycleTest".toCharArray();
+            HashedPassword stored = PBKDF2Hasher.defaultHashPassword(pwd);
+            
+            // First unlock
+            byte[] key1 = PBKDF2Hasher.deriveSessionKey(pwd, stored);
+            VaultSession.unlock(key1);
+            assertTrue(VaultSession.isUnlocked(), "Should be unlocked after first unlock");
+            
+            // Lock
+            VaultSession.lock();
+            assertFalse(VaultSession.isUnlocked(), "Should be locked after lock");
+            
+            // Second unlock
+            byte[] key2 = PBKDF2Hasher.deriveSessionKey(pwd, stored);
+            VaultSession.unlock(key2);
+            assertTrue(VaultSession.isUnlocked(), "Should be unlocked after second unlock");
+            
+            VaultSession.lock();
+            Arrays.fill(pwd, ' ');
+            Arrays.fill(key1, (byte) 0);
+            Arrays.fill(key2, (byte) 0);
+        });
+
     }
 
     private static void test(String name, TestRunnable runnable) {
