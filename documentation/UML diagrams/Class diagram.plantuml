@@ -1,0 +1,72 @@
+@startuml Class Diagram
+
+title PasswordManager Class Diagram
+
+class Main {
+  +main(args: String[]): void
+}
+
+class HashedPassword {
+  -algorithm: String
+  -iterations: int
+  -salt: String
+  -hash: String
+  +HashedPassword(algorithm: String, iterations: int, salt: String, hash: String)
+  +getAlgorithm(): String
+  +getIterations(): int
+  +getSalt(): String
+  +getHash(): String
+}
+
+class PBKDF2Hasher {
+  -KEY_LENGTH: int = 256
+  -DEFAULT_ITERATIONS: int = 600_000
+  -SALT_LENGTH: int = 16
+  +generateSalt(): byte[]
+  +hashPassword(password: char[], salt: byte[], iterations: int): HashedPassword
+  +defaultHashPassword(password: char[]): HashedPassword
+  +verifyPassword(password: char[], stored: HashedPassword): boolean
+  +deriveKey(password: char[], stored: HashedPassword): byte[]
+}
+
+class VaultStorage {
+  -vaultFolder: Path
+  -masterKeyFile: Path
+  +exists(): boolean
+  +saveMasterKey(algorithm: String, iterations: int, salt: String, hash: String): void
+  +loadMasterKey(): String
+  +loadHashedPassword(): HashedPassword
+}
+
+class VaultSession {
+  -unlocked: boolean
+  -vaultSessionKey: SecretKey
+  +unlock(keyBytes: byte[]): void
+  +lock(): void
+  +isUnlocked(): boolean
+  +getVaultSessionKey(): SecretKey
+}
+
+class PasswordValidator {
+  +validate(masterKeyChars: char[]): ValidationResult
+}
+
+class ValidationResult {
+  -ok: boolean
+  -messages: List<String>
+  +ValidationResult(ok: boolean, messages: List<String>)
+  +ok(): boolean
+  +messages(): List<String>
+}
+
+Main --> HashedPassword : uses
+Main --> PBKDF2Hasher : uses
+Main --> VaultStorage : uses
+Main --> VaultSession : uses
+Main --> PasswordValidator : uses
+Main --> ValidationResult : uses
+PBKDF2Hasher --> HashedPassword : creates
+VaultStorage --> HashedPassword : uses
+PasswordValidator --> ValidationResult : returns
+
+@enduml
