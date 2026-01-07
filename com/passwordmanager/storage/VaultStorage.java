@@ -243,3 +243,15 @@ public final class VaultStorage {
                     .replace("\r", "\\r")
                     .replace("\t", "\\t");
     }
+
+    /**
+     * Extracts a field from JSON using regex pattern.
+     */
+    private static String extractJsonField(String json, Pattern pattern, String fieldName) 
+            throws IOException {
+        Matcher matcher = pattern.matcher(json);
+        if (!matcher.find()) {
+            throw new IOException("Missing or invalid '" + fieldName + "' field in vault file");
+        }
+        return matcher.group(1);
+    }
