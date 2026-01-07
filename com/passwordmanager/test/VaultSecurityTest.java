@@ -430,6 +430,24 @@ public class VaultSecurityTest {
             }
         });
 
+        test("Empty vault file handling", () -> {
+            cleanupVault();
+            
+            try {
+                Files.createDirectories(Path.of("Vault"));
+                Files.writeString(Path.of("Vault/masterKey.json"), "");
+                
+                try {
+                    VaultStorage.loadHashedPassword();
+                    fail("Should throw IOException on empty file");
+                } catch (IOException e) {
+                    // Expected
+                }
+            } catch (IOException e) {
+                fail("Setup failed: " + e.getMessage());
+            }
+        });
+
         
 
     }
