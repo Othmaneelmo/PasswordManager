@@ -25,6 +25,7 @@ public class VaultSecurityTest {
         cleanupVault();
 
         runCryptographicTests();
+        runMemorySafetyTests();
 
         System.out.println();
         System.out.println("=".repeat(80));
@@ -132,7 +133,12 @@ public class VaultSecurityTest {
             Arrays.fill(pwd, ' ');
         });
     }
+    // ==================== MEMORY SAFETY TESTS ====================
 
+    private static void runMemorySafetyTests() {
+        printCategory("MEMORY SAFETY");
+    
+    }
     private static void test(String name, TestRunnable runnable) {
         testsRun++;
         System.out.print("  [" + testsRun + "] " + name + " ... ");
