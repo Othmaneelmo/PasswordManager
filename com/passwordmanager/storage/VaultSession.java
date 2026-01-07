@@ -136,6 +136,16 @@ public class VaultSession{
         }
         return vaultSessionKey;
     }
+
+    /**
+     * Returns the current lock state as a string for debugging.
+     * <p>
+     * <b>Warning:</b> This method does NOT expose key material, only the state.
+     * </p>
+     *
+     * @return "LOCKED" or "UNLOCKED"
+     */
+    public static String getState() {
+        return unlocked ? "UNLOCKED" : "LOCKED";
+    }
 }
-
-
