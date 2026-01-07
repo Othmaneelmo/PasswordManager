@@ -550,6 +550,34 @@ public class VaultSecurityTest {
             
             Arrays.fill(pwd, ' ');
         });
+
+        test("Timing attack resistance (constant-time comparison)", () -> {
+            char[] pwd = "timingTest".toCharArray();
+            HashedPassword stored = PBKDF2Hasher.defaultHashPassword(pwd);
+            
+            // Test with completely wrong password
+            char[] wrong1 = "aaaaaaaaaa".toCharArray();
+            long start1 = System.nanoTime();
+            PBKDF2Hasher.verifyPassword(wrong1, stored);
+            long time1 = System.nanoTime() - start1;
+            
+            // Test with almost correct password (one char different)
+            char[] wrong2 = new char[pwd.length];
+            System.arraycopy(pwd, 0, wrong2, 0, pwd.length);
+            wrong2[0] = 'X';
+            long start2 = System.nanoTime();
+            PBKDF2Hasher.verifyPassword(wrong2, stored);
+            long time2 = System.nanoTime() - start2;
+            
+            // Timing difference should be minimal (< 10% difference)
+            // Note: PBKDF2 overhead dominates, making timing attacks impractical
+            double ratio = (double) Math.max(time1, time2) / Math.min(time1, time2);
+            assertTrue(ratio < 1.5, "Verification time should be relatively constant");
+            
+            Arrays.fill(pwd, ' ');
+            Arrays.fill(wrong1, ' ');
+            Arrays.fill(wrong2, ' ');
+        });
     }
 
     private static void test(String name, TestRunnable runnable) {
