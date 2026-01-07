@@ -241,6 +241,17 @@ public class VaultSecurityTest {
             Arrays.fill(pwd, ' ');
             Arrays.fill(key, (byte) 0);
         });
+
+        test("Cannot get key when locked", () -> {
+            VaultSession.lock(); // Ensure locked
+            
+            try {
+                VaultSession.getVaultSessionKey();
+                fail("Should not be able to get key when locked");
+            } catch (IllegalStateException e) {
+                // Expected
+            }
+        });
     }
 
     private static void test(String name, TestRunnable runnable) {
