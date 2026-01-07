@@ -9,6 +9,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Advanced test suite for the password manager vault core.
@@ -453,6 +457,36 @@ public class VaultSecurityTest {
 
     private static void runConcurrencyTests() {
         printCategory("CONCURRENCY & THREAD SAFETY");
+
+        test("Multiple thread password hashing", () -> {
+            ExecutorService executor = Executors.newFixedThreadPool(10);
+            CountDownLatch latch = new CountDownLatch(20);
+            
+            for (int i = 0; i < 20; i++) {
+                final int index = i;
+                executor.submit(() -> {
+                    try {
+                        char[] pwd = ("thread" + index).toCharArray();
+                        HashedPassword hp = PBKDF2Hasher.defaultHashPassword(pwd);
+                        Arrays.fill(pwd, ' ');
+                        latch.countDown();
+                    } catch (Exception e) {
+                        fail("Thread " + index + " failed: " + e.getMessage());
+                    }
+                });
+            }
+            
+            try {
+                boolean completed = latch.await(30, TimeUnit.SECONDS);
+                assertTrue(completed, "All threads should complete within 30 seconds");
+            } catch (InterruptedException e) {
+                fail("Concurrency test interrupted");
+            }
+            
+            executor.shutdown();
+        });
+
+        
     }
 
     private static void test(String name, TestRunnable runnable) {
