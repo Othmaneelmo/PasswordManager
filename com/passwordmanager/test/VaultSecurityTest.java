@@ -630,6 +630,17 @@ public class VaultSecurityTest {
 
     private static void runEdgeCaseTests() {
         printCategory("EDGE CASES");
+
+        test("Empty password rejection", () -> {
+            char[] empty = new char[0];
+            
+            try {
+                PBKDF2Hasher.defaultHashPassword(empty);
+                fail("Should reject empty password");
+            } catch (IllegalArgumentException e) {
+                // Expected
+            }
+        });
     }
 
     private static void test(String name, TestRunnable runnable) {
