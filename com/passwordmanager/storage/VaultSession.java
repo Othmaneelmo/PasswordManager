@@ -119,15 +119,20 @@ public class VaultSession{
     /**
      * Returns the {@link SecretKey} representing the current vault session key.
      * <p>
-     * This method can only be called when the vault is unlocked.
+     * <b>This method can only be called when the vault is unlocked.</b>
+     * </p>
+     * <p>
+     * <b>Security Warning:</b> The returned key should NEVER be serialized,
+     * logged, or persisted. It should only be used for in-memory cryptographic
+     * operations during the current session.
      * </p>
      *
      * @return the AES {@link SecretKey} for the current session
-     * @throws IllegalStateException if the vault is locked or the key is null
+     * @throws IllegalStateException if the vault is locked
      */
-    public static SecretKey getVaultSessionKey(){
-        if(!unlocked || vaultSessionKey == null){
-            throw new IllegalStateException("Vault is locked, Unlock first");
+    public static synchronized SecretKey getVaultSessionKey() {
+        if (!unlocked || vaultSessionKey == null) {
+            throw new IllegalStateException("Vault is locked. Call unlock() first.");
         }
         return vaultSessionKey;
     }
