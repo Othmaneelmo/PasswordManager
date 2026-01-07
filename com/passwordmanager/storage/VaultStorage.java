@@ -255,3 +255,17 @@ public final class VaultStorage {
         }
         return matcher.group(1);
     }
+
+    /**
+     * Validates that a string is proper Base64 encoding.
+     */
+    private static void validateBase64(String value, String fieldName) {
+        if (value == null || value.isEmpty()) {
+            throw new IllegalArgumentException(fieldName + " cannot be null or empty");
+        }
+        try {
+            Base64.getDecoder().decode(value);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(fieldName + " is not valid Base64: " + e.getMessage());
+        }
+    }
