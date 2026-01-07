@@ -9,28 +9,41 @@ import javax.crypto.spec.PBEKeySpec;
 /**
  * Utility class for hashing passwords and deriving keys using PBKDF2 (HMAC-SHA256).
  * <p>
- * Provides methods to generate salts, hash passwords, verify password matches, 
- * and derive raw key bytes for session use.
+ * <b>Cryptographic Lifecycle:</b>
  * </p>
+ * <ul>
+ *   <li><b>Hashing</b> – For password authentication (stored hash comparison)</li>
+ *   <li><b>Verification</b> – For validating user-entered passwords against stored hashes</li>
+ *   <li><b>Key Derivation</b> – For generating session keys used in encryption/decryption</li>
+ * </ul>
  * <p>
  * All sensitive data (passwords, derived keys) are cleared from memory immediately 
  * after use wherever possible to reduce exposure.
  * </p>
+ * 
+ * <p><b>Security Guarantees:</b></p>
+ * <ul>
+ *   <li>Salts are cryptographically random (128-bit minimum)</li>
+ *   <li>Iteration count meets OWASP recommendations (600,000+)</li>
+ *   <li>Derived keys are 256-bit for AES-256 compatibility</li>
+ *   <li>All intermediate key material is zeroized after use</li>
+ * </ul>
  */
-public class PBKDF2Hasher {
-    private static final int KEY_LENGTH = 256;     // in bits
+public final class PBKDF2Hasher {
+    private static final String ALGORITHM = "PBKDF2WithHmacSHA256";
+    private static final int KEY_LENGTH_BITS = 256;
     private static final int DEFAULT_ITERATIONS = 600_000;
-    private static final int SALT_LENGTH = 16;     // 16 bytes = 128 bits
+    private static final int SALT_LENGTH_BYTES = 16;     // 16 bytes = 128 bits
 
     /**
-     * Generates a random salt.
+     * Generates a cryptographically secure random salt.
      *
      * @return a byte array containing a randomly generated salt
      */
     public static byte[] generateSalt() {
-        SecureRandom saltGenerator = new SecureRandom();
-        byte[] salt = new byte[SALT_LENGTH];
-        saltGenerator.nextBytes(salt);
+        SecureRandom random = new SecureRandom();
+        byte[] salt = new byte[SALT_LENGTH_BYTES];
+        random.nextBytes(salt);
         return salt;
     }
 
