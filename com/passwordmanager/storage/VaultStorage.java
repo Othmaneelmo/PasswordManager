@@ -130,22 +130,42 @@ public final class VaultStorage {
      * Loads the master key as a {@link HashedPassword} object.
      * <p>
      * Parses the JSON file to extract algorithm, iterations, salt, and hash.
+     * Uses regex-based extraction for security (avoids eval-like vulnerabilities).
+     * </p>
+     * <p>
+     * <b>Validation:</b> This method validates that all required fields are present
+     * and that Base64-encoded fields are properly formatted.
      * </p>
      *
      * @return the {@link HashedPassword} instance, or {@code null} if the file does not exist
-     * @throws IOException if reading the vault file fails
+     * @throws IOException if reading the vault file fails or parsing fails
      */
     public static HashedPassword loadHashedPassword() throws IOException {
-        if (!Files.exists(masterKeyFile)) {
+        if (!Files.exists(MASTER_KEY_FILE)) {
             return null;
         }
-        String json = Files.readString(masterKeyFile);
-        String algorithm = json.replaceAll("(?s).*\"algorithm\":\\s*\"([^\"]+)\".*", "$1");
-        int iterations = Integer.parseInt(json.replaceAll("(?s).*\"iterations\":\\s*(\\d+).*", "$1"));
-        String salt = json.replaceAll("(?s).*\"salt\":\\s*\"([^\"]+)\".*", "$1");
-        String hash = json.replaceAll("(?s).*\"hash\":\\s*\"([^\"]+)\".*", "$1");
-        return new HashedPassword(algorithm, iterations, salt, hash);
+        
+        String json = Files.readString(MASTER_KEY_FILE).trim();
+        
+        if (json.isEmpty()) {
+            throw new IOException("Master key file is empty or corrupted");
+        }
+
+        try {
+            String algorithm = extractJsonField(json, ALGORITHM_PATTERN, "algorithm");
+            int iterations = Integer.parseInt(extractJsonField(json, ITERATIONS_PATTERN, "iterations"));
+            String salt = extractJsonField(json, SALT_PATTERN, "salt");
+            String hash = extractJsonField(json, HASH_PATTERN, "hash");
+            
+            // Validate Base64 encoding
+            validateBase64(salt, "salt");
+            validateBase64(hash, "hash");
+            
+            return new HashedPassword(algorithm, iterations, salt, hash);
+            
+        } catch (NumberFormatException e) {
+            throw new IOException("Invalid iteration count in vault file", e);
+        } catch (IllegalArgumentException e) {
+            throw new IOException("Corrupted vault file: " + e.getMessage(), e);
+        }
     }
-
-
-}
