@@ -37,11 +37,14 @@ import javax.crypto.spec.SecretKeySpec;
  *   <li>State transitions are atomic and fail-safe</li>
  * </ul>
  */
-public class VaultSession{
+public final class VaultSession {
     private static volatile boolean unlocked = false;
     private static volatile SecretKey vaultSessionKey = null;
 
-
+    // Prevent instantiation
+    private VaultSession() {
+        throw new AssertionError("VaultSession is a static utility and should not be instantiated");
+    }
 
     /**
      * Unlocks the vault using the provided key bytes.
