@@ -31,7 +31,7 @@ public class VaultSecurityTest {
         runMemorySafetyTests();
         runStateMachineTests();
         runStorageTests();
-        //runConcurrencyTests();
+        runConcurrencyTests();
         //runAttackResistanceTests();
         //runEdgeCaseTests();
 
@@ -447,9 +447,12 @@ public class VaultSecurityTest {
                 fail("Setup failed: " + e.getMessage());
             }
         });
+    }
 
-        
+    // ==================== CONCURRENCY TESTS ====================
 
+    private static void runConcurrencyTests() {
+        printCategory("CONCURRENCY & THREAD SAFETY");
     }
 
     private static void test(String name, TestRunnable runnable) {
