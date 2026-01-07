@@ -105,6 +105,18 @@ public class VaultSecurityTest {
             Arrays.fill(key1, (byte) 0);
             Arrays.fill(key2, (byte) 0);
         });
+
+        test("Session key is 256 bits", () -> {
+            char[] pwd = "keyLengthTest".toCharArray();
+            HashedPassword stored = PBKDF2Hasher.defaultHashPassword(pwd);
+            
+            byte[] key = PBKDF2Hasher.deriveSessionKey(pwd, stored);
+            
+            assertEquals(32, key.length, "Session key should be 32 bytes (256 bits)");
+            
+            Arrays.fill(pwd, ' ');
+            Arrays.fill(key, (byte) 0);
+        });
     }
 
     private static void test(String name, TestRunnable runnable) {
