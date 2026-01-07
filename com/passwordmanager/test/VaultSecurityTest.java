@@ -588,6 +588,26 @@ public class VaultSecurityTest {
             
             Arrays.fill(pwd, ' ');
         });
+
+        test("SQL injection resistance in storage", () -> {
+            char[] pwd = "'; DROP TABLE users; --".toCharArray();
+            
+            try {
+                HashedPassword hp = PBKDF2Hasher.defaultHashPassword(pwd);
+                VaultStorage.saveMasterKey(hp.getAlgorithm(), hp.getIterations(), hp.getSalt(), hp.getHash());
+                
+                HashedPassword loaded = VaultStorage.loadHashedPassword();
+                assertNotNull(loaded, "Should handle special characters safely");
+                
+                // Verify password still works
+                assertTrue(PBKDF2Hasher.verifyPassword(pwd, loaded), 
+                    "Password with special chars should verify correctly");
+            } catch (Exception e) {
+                fail("Should handle SQL-like injection characters: " + e.getMessage());
+            }
+            
+            Arrays.fill(pwd, ' ');
+        });
     }
 
     private static void test(String name, TestRunnable runnable) {
