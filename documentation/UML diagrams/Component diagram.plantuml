@@ -4,7 +4,6 @@ title PasswordManager Component Diagram
 
 component "User Interface" as UI {
   component "Console" as Console
-  component "Menu" as Menu
 }
 
 component "Main" as Main {
