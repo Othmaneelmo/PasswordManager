@@ -46,21 +46,37 @@ public class VaultSession{
     /**
      * Unlocks the vault using the provided key bytes.
      * <p>
-     * Wraps the raw key bytes in a {@link SecretKey} (AES) for session use.
-     * The vault cannot be unlocked if it is already unlocked.
+     * The key bytes are wrapped in a {@link SecretKey} (AES) for session use.
+     * The caller is responsible for clearing the input {@code keyBytes} array
+     * after this method returns.
      * </p>
+     * <p>
+     * <b>Preconditions:</b>
+     * </p>
+     * <ul>
+     *   <li>Vault must be locked</li>
+     *   <li>{@code keyBytes} must be exactly 32 bytes (256 bits)</li>
+     *   <li>{@code keyBytes} must not be null</li>
+     * </ul>
      *
-     * @param keyBytes the derived key bytes to unlock the vault
+     * @param keyBytes the derived key bytes to unlock the vault (must be 32 bytes for AES-256)
      * @throws IllegalStateException if the vault is already unlocked
+     * @throws IllegalArgumentException if keyBytes is null or not 32 bytes
      */
-    public static void unlock(byte[] keyBytes){
-        if(unlocked){
-            throw new IllegalStateException("Vault is already unlocked!");
+    public static synchronized void unlock(byte[] keyBytes) {
+        if (unlocked) {
+            throw new IllegalStateException("Vault is already unlocked");
         }
-        //Wrap key material in a SecretKey (AES key)
+        if (keyBytes == null) {
+            throw new IllegalArgumentException("Key bytes cannot be null");
+        }
+        if (keyBytes.length != 32) {
+            throw new IllegalArgumentException("Key must be 32 bytes (256 bits) for AES-256");
+        }
+
+        // Wrap key material in a SecretKey (AES key)
         vaultSessionKey = new SecretKeySpec(keyBytes, "AES");
         unlocked = true;
-
     }
 
     /**
