@@ -73,26 +73,33 @@ public class Main {
                 System.out.println("Master key already exists — not overwriting.");
             }
 
-    } catch (NoSuchAlgorithmException e) {
-        System.out.println("PBKDF2 algorithm not available: " + e.getMessage());
-    } catch (InvalidKeySpecException e) {
-        System.out.println("Invalid PBKDF2 key specification: " + e.getMessage());
-    } finally {
-        Arrays.fill(masterKeyChars, ' '); // ensures cleanup in all cases
-    }
-    
-    
-    //Test: load and verify masterkey
-    if(VaultStorage.exists()){
-      System.out.println("Testing masterkey Loading and Verification");
-      try{
-        //Load JSON and parse it into HashedPassword
-        HashedPassword stored = VaultStorage.loadHashedPassword();
+        } catch (NoSuchAlgorithmException e) {
+            System.out.println("PBKDF2 algorithm not available: " + e.getMessage());
+            Arrays.fill(masterKeyChars, ' ');
+            return;
+        } catch (InvalidKeySpecException e) {
+            System.out.println("Invalid PBKDF2 key specification: " + e.getMessage());
+            Arrays.fill(masterKeyChars, ' ');
+            return;
+        } finally {
+            Arrays.fill(masterKeyChars, ' '); // ensures cleanup in all cases
+        }
 
-        //Ask user to reenter masterkey for verifying
-        char[] masterKeyVerification = console.readPassword("Re-enter the masterkey: ");
-        
-        boolean sameMasterKey = PBKDF2Hasher.verifyPassword(masterKeyVerification, stored);
+        // LOAD AND VERIFY MASTER KEY
+        if (VaultStorage.exists()) {
+            System.out.println("\n--- Vault Unlock Test ---");
+            try {
+                // Load stored hash
+                HashedPassword stored = VaultStorage.loadHashedPassword();
+                if (stored == null) {
+                    System.out.println("Error: Could not load master key from vault.");
+                    return;
+                }
+
+                // Ask user to re-enter master key for verification
+                char[] masterKeyVerification = console.readPassword("Re-enter the master key to unlock: ");
+
+                boolean verified = PBKDF2Hasher.verifyPassword(masterKeyVerification, stored);
 
         if(sameMasterKey){
           System.out.println("same masterKey inputted: Good!");
