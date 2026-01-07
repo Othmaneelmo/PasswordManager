@@ -486,7 +486,52 @@ public class VaultSecurityTest {
             executor.shutdown();
         });
 
-        
+        test("Session lock/unlock race condition", () -> {
+            VaultSession.lock();
+            
+            char[] pwd = "raceTest".toCharArray();
+            HashedPassword stored = PBKDF2Hasher.defaultHashPassword(pwd);
+            byte[] key = PBKDF2Hasher.deriveSessionKey(pwd, stored);
+            
+            ExecutorService executor = Executors.newFixedThreadPool(5);
+            CountDownLatch latch = new CountDownLatch(10);
+            
+            // 5 threads try to unlock, 5 try to lock
+            for (int i = 0; i < 5; i++) {
+                executor.submit(() -> {
+                    try {
+                        byte[] threadKey = PBKDF2Hasher.deriveSessionKey(pwd, stored);
+                        VaultSession.unlock(threadKey);
+                        Arrays.fill(threadKey, (byte) 0);
+                    } catch (IllegalStateException e) {
+                        // Expected - some will fail due to race
+                    } catch (Exception e) {
+                        // Ignore crypto exceptions in threads
+                    }
+                    latch.countDown();
+                });
+                
+                executor.submit(() -> {
+                    try {
+                        VaultSession.lock();
+                    } catch (Exception e) {
+                        // Safe to ignore
+                    }
+                    latch.countDown();
+                });
+            }
+            
+            try {
+                latch.await(10, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                fail("Race condition test interrupted");
+            }
+            
+            executor.shutdown();
+            VaultSession.lock();
+            Arrays.fill(pwd, ' ');
+            Arrays.fill(key, (byte) 0);
+        });
     }
 
     private static void test(String name, TestRunnable runnable) {
