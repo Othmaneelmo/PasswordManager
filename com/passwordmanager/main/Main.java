@@ -54,21 +54,24 @@ public class Main {
             return;
         }
 
-        
-    try {
-        HashedPassword encodedHash = PBKDF2Hasher.defaultHashPassword(masterKeyChars);
+        // HASH PASSWORD FOR AUTHENTICATION
+        try {
+            HashedPassword encodedHash = PBKDF2Hasher.defaultHashPassword(masterKeyChars);
+            
+            System.out.println("PBKDF2 hash generated successfully!");
 
-        /*TODO: store hash + encodedsalt + iterations securely*/
-
-        if (!VaultStorage.exists()) {
-            VaultStorage.saveMasterKey(encodedHash.getAlgorithm(), encodedHash.getIterations(), encodedHash.getSalt(), encodedHash.getHash());
-            System.out.println("Master key saved to vault!");
-        } else {
-          //below overwrites masterkey.json, current raw masterkey: password123@
-            //VaultStorage.saveMasterKey(encodedHash.getAlgorithm(), encodedHash.getIterations(), encodedHash.getSalt(), encodedHash.getHash());
-            //System.out.println("Master key saved to vault!");
-            System.out.println("Master key already exists — not overwriting.");
-        }
+            // SAVE TO VAULT (if not exists)
+            if (!VaultStorage.exists()) {
+                VaultStorage.saveMasterKey(
+                    encodedHash.getAlgorithm(), 
+                    encodedHash.getIterations(), 
+                    encodedHash.getSalt(), 
+                    encodedHash.getHash()
+                );
+                System.out.println("Master key saved to vault!");
+            } else {
+                System.out.println("Master key already exists — not overwriting.");
+            }
 
     } catch (NoSuchAlgorithmException e) {
         System.out.println("PBKDF2 algorithm not available: " + e.getMessage());
