@@ -252,6 +252,23 @@ public class VaultSecurityTest {
                 // Expected
             }
         });
+
+        test("Lock is idempotent", () -> {
+            char[] pwd = "idempotentTest".toCharArray();
+            HashedPassword stored = PBKDF2Hasher.defaultHashPassword(pwd);
+            byte[] key = PBKDF2Hasher.deriveSessionKey(pwd, stored);
+            
+            VaultSession.unlock(key);
+            VaultSession.lock();
+            VaultSession.lock(); // Second lock should not throw
+            VaultSession.lock(); // Third lock should not throw
+            
+            assertFalse(VaultSession.isUnlocked(), "Vault should remain locked");
+            
+            Arrays.fill(pwd, ' ');
+            Arrays.fill(key, (byte) 0);
+        });
+
     }
 
     private static void test(String name, TestRunnable runnable) {
