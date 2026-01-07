@@ -4,6 +4,9 @@ import com.passwordmanager.security.HashedPassword;
 import com.passwordmanager.security.PBKDF2Hasher;
 import com.passwordmanager.storage.VaultSession;
 import com.passwordmanager.storage.VaultStorage;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Base64;
 
@@ -404,6 +407,26 @@ public class VaultSecurityTest {
                 fail("Should reject invalid Base64 hash");
             } catch (IllegalArgumentException e) {
                 // Expected
+            }
+        });
+
+        test("Corrupted JSON handling", () -> {
+            cleanupVault();
+            
+            try {
+                // Create vault folder
+                Files.createDirectories(Path.of("Vault"));
+                // Write corrupted JSON
+                Files.writeString(Path.of("Vault/masterKey.json"), "{corrupt json");
+                
+                try {
+                    VaultStorage.loadHashedPassword();
+                    fail("Should throw IOException on corrupted JSON");
+                } catch (IOException e) {
+                    // Expected
+                }
+            } catch (IOException e) {
+                fail("Setup failed: " + e.getMessage());
             }
         });
 
