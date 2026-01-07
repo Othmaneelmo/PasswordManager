@@ -49,6 +49,41 @@ public class VaultSecurityTest {
         }
     }
 
+    private static void assertTrue(boolean condition, String message) {
+        if (!condition) {
+            throw new AssertionError(message);
+        }
+    }
+
+    private static void assertFalse(boolean condition, String message) {
+        if (condition) {
+            throw new AssertionError(message);
+        }
+    }
+
+    private static void assertEquals(Object expected, Object actual, String message) {
+        if (expected == null && actual == null) return;
+        if (expected == null || !expected.equals(actual)) {
+            throw new AssertionError(message + " (expected: " + expected + ", actual: " + actual + ")");
+        }
+    }
+
+    private static void assertNotNull(Object obj, String message) {
+        if (obj == null) {
+            throw new AssertionError(message);
+        }
+    }
+
+    private static void assertNull(Object obj, String message) {
+        if (obj != null) {
+            throw new AssertionError(message);
+        }
+    }
+
+    private static void fail(String message) {
+        throw new AssertionError(message);
+    }
+
     @FunctionalInterface
     interface TestRunnable {
         void run() throws Exception;
