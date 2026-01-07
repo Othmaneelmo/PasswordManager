@@ -286,4 +286,21 @@ public final class VaultStorage {
             // Future improvement: use Windows ACLs
         }
     }
+
+
+    /**
+     * Restricts folder permissions to owner-only (Unix/Linux systems).
+     */
+    private static void restrictFolderPermissions(Path folder) {
+        try {
+            Set<PosixFilePermission> perms = Set.of(
+                PosixFilePermission.OWNER_READ,
+                PosixFilePermission.OWNER_WRITE,
+                PosixFilePermission.OWNER_EXECUTE
+            );
+            Files.setPosixFilePermissions(folder, perms);
+        } catch (UnsupportedOperationException | IOException e) {
+            // POSIX permissions not supported
+        }
+    }
 }
