@@ -80,7 +80,17 @@ public class VaultSecurityTest {
             assertTrue(verified, "Correct password should verify successfully");
             Arrays.fill(pwd, ' ');
         });
-
+        test("Password verification - incorrect password", () -> {
+            char[] pwd = "correctPassword123!".toCharArray();
+            HashedPassword stored = PBKDF2Hasher.defaultHashPassword(pwd);
+            Arrays.fill(pwd, ' ');
+            
+            char[] wrong = "wrongPassword456!".toCharArray();
+            boolean verified = PBKDF2Hasher.verifyPassword(wrong, stored);
+            
+            assertFalse(verified, "Wrong password should fail verification");
+            Arrays.fill(wrong, ' ');
+        });
     }
 
     private static void test(String name, TestRunnable runnable) {
