@@ -312,6 +312,15 @@ public class VaultSecurityTest {
             }
         });
 
+        test("Null key rejected", () -> {
+            try {
+                VaultSession.unlock(null);
+                fail("Should reject null key");
+            } catch (IllegalArgumentException e) {
+                // Expected
+            }
+        });  
+
     }
 
     private static void test(String name, TestRunnable runnable) {
