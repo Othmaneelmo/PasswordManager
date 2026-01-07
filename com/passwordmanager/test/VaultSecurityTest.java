@@ -27,7 +27,7 @@ public class VaultSecurityTest {
         runCryptographicTests();
         runMemorySafetyTests();
         runStateMachineTests();
-        //runStorageTests();
+        runStorageTests();
         //runConcurrencyTests();
         //runAttackResistanceTests();
         //runEdgeCaseTests();
@@ -321,6 +321,12 @@ public class VaultSecurityTest {
             }
         });  
 
+    }
+
+    // ==================== STORAGE TESTS ====================
+
+    private static void runStorageTests() {
+        printCategory("STORAGE LAYER");
     }
 
     private static void test(String name, TestRunnable runnable) {
