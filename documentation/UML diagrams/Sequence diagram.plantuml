@@ -36,7 +36,7 @@ alt password valid
     PBKDF2Hasher --> Main: return true/false
 
     alt verification successful
-        Main -> PBKDF2Hasher: deriveKey(masterKeyVerification, stored)
+        Main -> PBKDF2Hasher: deriveSessionKey(masterKeyVerification, stored)
         PBKDF2Hasher --> Main: return sessionKey
         Main -> VaultSession: unlock(sessionKey)
         VaultSession --> Main: vault unlocked
