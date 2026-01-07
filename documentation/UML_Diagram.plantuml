@@ -1,71 +1,54 @@
-@startuml
-skinparam classAttributeIconSize 0
+@startuml Component Diagram
 
-' Main entry point
-class Main {
-    +main(args: String[]) : void
+title PasswordManager Component Diagram
+
+component "User Interface" as UI {
+  component "Console" as Console
+  component "Menu" as Menu
 }
 
-' Immutable hashed password container
-class HashedPassword {
-    -algorithm: String
-    -iterations: int
-    -salt: String
-    -hash: String
-    +HashedPassword(algorithm: String, iterations: int, salt: String, hash: String)
-    +getAlgorithm(): String
-    +getIterations(): int
-    +getSalt(): String
-    +getHash(): String
+component "Main" as Main {
+  note right
+    Entry point for the application.
+    Handles master key creation, validation,
+    hashing, storage, and vault unlocking.
+  end note
 }
 
-' PBKDF2 password hasher
-class PBKDF2Hasher {
-    -KEY_LENGTH: int
-    -DEFAULT_ITERATIONS: int
-    -SALT_LENGTH: int
-    +generateSalt(): byte[]
-    +hashPassword(password: char[], salt: byte[], iterations: int): HashedPassword
-    +defaultHashPassword(password: char[]): HashedPassword
-    +verifyPassword(password: char[], stored: HashedPassword): boolean
+component "Security" as Security {
+  component "PBKDF2Hasher" as Hasher
+  component "HashedPassword" as HashedPwd
+  note right
+    Handles password hashing, verification,
+    and key derivation using PBKDF2.
+  end note
 }
 
-' Vault storage
-class VaultStorage {
-    -vaultFolder: Path
-    -masterKeyFile: Path
-    +exists(): boolean
-    +saveMasterKey(algorithm: String, iterations: int, salt: String, hash: String): void
-    +loadMasterKey(): String
-    +loadHashedPassword(): HashedPassword
+component "Storage" as Storage {
+  component "VaultStorage" as VaultStorage
+  component "VaultSession" as VaultSession
+  component "Vault Folder" as VaultFolder
+  note right
+    Manages persistent storage of master key
+    and session unlocking.
+  end note
 }
 
-' Password validator
-class PasswordValidator {
-    -MIN_LENGTH: int
-    -BLACKLIST: char[][]
-    -equalsIgnoreCase(a: char[], b: char[]): boolean
-    -countUniquesAsciiBuckets(pwd: char[]): int
-    -hasSimpleAscendingSequence(pwd: char[], win: int): boolean
-    +validate(pwd: char[]): ValidationResult
+component "Validation" as Validation {
+  component "PasswordValidator" as Validator
+  component "ValidationResult" as Result
+  note right
+    Validates password strength and provides
+    feedback on requirements.
+  end note
 }
 
-' Validation result
-class ValidationResult {
-    -ok: boolean
-    -messages: List<String>
-    +ValidationResult(ok: boolean, messages: List<String>)
-    +ok(): boolean
-    +messages(): List<String>
-}
-
-' Relationships
-Main --> PBKDF2Hasher : uses
-Main --> VaultStorage : uses
-Main --> PasswordValidator : uses
-Main --> ValidationResult : uses
-PBKDF2Hasher --> HashedPassword : creates/returns
-VaultStorage --> HashedPassword : creates/returns
-PasswordValidator --> ValidationResult : returns
+UI --> Main : interacts with
+Main --> Security : uses for hashing
+Main --> Storage : uses for persistence
+Main --> Validation : uses for validation
+Security --> HashedPwd : creates
+Storage --> VaultFolder : stores in
+Validation --> Result : returns
 
 @enduml
