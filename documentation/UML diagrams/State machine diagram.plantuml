@@ -1,0 +1,32 @@
+@startuml State Machine Diagram
+
+title PasswordManager State Machine
+
+[*] --> Initial : start application
+
+Initial --> PromptMasterKey : console available
+
+PromptMasterKey --> Validating : password entered
+
+Validating --> InvalidExit : password invalid
+Validating --> Hashing : password valid
+
+InvalidExit --> [*] : exit
+
+Hashing --> CheckingVault : hash generated
+
+CheckingVault --> Saving : vault not exists
+CheckingVault --> PromptVerify : vault exists
+
+Saving --> PromptVerify : master key saved
+
+PromptVerify --> Verifying : password re-entered
+
+Verifying --> WrongKey : verification failed
+Verifying --> Unlocked : verification successful
+
+WrongKey --> [*] : exit
+
+Unlocked --> [*] : vault unlocked
+
+@enduml
