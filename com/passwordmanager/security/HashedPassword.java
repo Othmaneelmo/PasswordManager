@@ -1,4 +1,5 @@
 package com.passwordmanager.security;
+
 /**
  * Immutable data holder for a hashed password.
  * <p>
@@ -16,7 +17,7 @@ package com.passwordmanager.security;
  * Instances of this class are immutable.
  * </p>
  */
-public class HashedPassword {
+public final class HashedPassword {
     private final String algorithm;
     private final int iterations;
     private final String salt;
@@ -30,7 +31,7 @@ public class HashedPassword {
      * @param salt       the Base64-encoded random salt
      * @param hash       the Base64-encoded derived key
      */
-    public HashedPassword(String algorithm, int iterations, String salt, String hash){
+    public HashedPassword(String algorithm, int iterations, String salt, String hash) {
         this.algorithm = algorithm;
         this.iterations = iterations;
         this.salt = salt;
@@ -42,7 +43,7 @@ public class HashedPassword {
      *
      * @return the algorithm name
      */
-    public String getAlgorithm(){
+    public String getAlgorithm() {
         return algorithm;
     }
 
@@ -51,7 +52,7 @@ public class HashedPassword {
      *
      * @return the iteration count
      */
-    public int getIterations(){
+    public int getIterations() {
         return iterations;
     }
 
