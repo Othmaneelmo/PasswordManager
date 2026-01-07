@@ -231,3 +231,15 @@ public final class VaultStorage {
             escapeJsonString(hash)
         );
     }
+
+    /**
+     * Escapes special characters for JSON strings.
+     */
+    private static String escapeJsonString(String value) {
+        if (value == null) return "";
+        return value.replace("\\", "\\\\")
+                    .replace("\"", "\\\"")
+                    .replace("\n", "\\n")
+                    .replace("\r", "\\r")
+                    .replace("\t", "\\t");
+    }
