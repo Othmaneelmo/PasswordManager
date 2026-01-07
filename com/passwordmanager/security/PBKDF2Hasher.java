@@ -1,4 +1,5 @@
 package com.passwordmanager.security;
+
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -34,7 +35,12 @@ public final class PBKDF2Hasher {
     private static final String ALGORITHM = "PBKDF2WithHmacSHA256";
     private static final int KEY_LENGTH_BITS = 256;
     private static final int DEFAULT_ITERATIONS = 600_000;
-    private static final int SALT_LENGTH_BYTES = 16;     // 16 bytes = 128 bits
+    private static final int SALT_LENGTH_BYTES = 16;
+
+    // Private constructor prevents instantiation
+    private PBKDF2Hasher() {
+        throw new AssertionError("Utility class should not be instantiated");
+    }
 
     /**
      * Generates a cryptographically secure random salt.
