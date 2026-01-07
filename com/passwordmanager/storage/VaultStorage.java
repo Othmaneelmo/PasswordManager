@@ -189,3 +189,27 @@ public final class VaultStorage {
             Files.delete(VAULT_FOLDER);
         }
     }
+
+    // ==================== PRIVATE HELPER METHODS ====================
+
+    /**
+     * Validates inputs for saveMasterKey method.
+     */
+    private static void validateSaveInputs(String algorithm, int iterations, String salt, String hash) {
+        if (algorithm == null || algorithm.trim().isEmpty()) {
+            throw new IllegalArgumentException("Algorithm cannot be null or empty");
+        }
+        if (iterations < 1) {
+            throw new IllegalArgumentException("Iterations must be positive");
+        }
+        if (salt == null || salt.trim().isEmpty()) {
+            throw new IllegalArgumentException("Salt cannot be null or empty");
+        }
+        if (hash == null || hash.trim().isEmpty()) {
+            throw new IllegalArgumentException("Hash cannot be null or empty");
+        }
+        
+        // Validate Base64 encoding
+        validateBase64(salt, "salt");
+        validateBase64(hash, "hash");
+    }
