@@ -36,7 +36,7 @@ public class VaultSecurityTest {
         runStateMachineTests();
         runStorageTests();
         runConcurrencyTests();
-        //runAttackResistanceTests();
+        runAttackResistanceTests();
         //runEdgeCaseTests();
 
         System.out.println();
@@ -532,6 +532,10 @@ public class VaultSecurityTest {
             Arrays.fill(pwd, ' ');
             Arrays.fill(key, (byte) 0);
         });
+    }
+
+    private static void runAttackResistanceTests() {
+        printCategory("ATTACK RESISTANCE");
     }
 
     private static void test(String name, TestRunnable runnable) {
