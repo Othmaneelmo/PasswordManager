@@ -57,6 +57,20 @@ public class VaultSecurityTest {
             assertFalse(Arrays.equals(salt1, salt2),
                     "Two generated salts should be different");
         });
+
+        test("Different salts produce different hashes", () -> {
+            char[] pwd = "samePassword".toCharArray();
+            byte[] salt1 = PBKDF2Hasher.generateSalt();
+            byte[] salt2 = PBKDF2Hasher.generateSalt();
+            
+            HashedPassword h1 = PBKDF2Hasher.hashPassword(pwd, salt1, 100000);
+            HashedPassword h2 = PBKDF2Hasher.hashPassword(pwd, salt2, 100000);
+            
+            assertFalse(h1.getHash().equals(h2.getHash()), 
+                "Different salts should produce different hashes");
+            Arrays.fill(pwd, ' ');
+        });
+
     }
 
     private static void test(String name, TestRunnable runnable) {
