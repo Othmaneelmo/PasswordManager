@@ -79,8 +79,8 @@ public final class PBKDF2Hasher {
             SecretKeyFactory factory = SecretKeyFactory.getInstance(ALGORITHM);
             hash = factory.generateSecret(spec).getEncoded();
             
-        String encodedSalt = Base64.getEncoder().encodeToString(salt);
-        String encodedHash = Base64.getEncoder().encodeToString(hash);
+            String encodedSalt = Base64.getEncoder().encodeToString(salt);
+            String encodedHash = Base64.getEncoder().encodeToString(hash);
             
             return new HashedPassword(ALGORITHM, iterations, encodedSalt, encodedHash);
             
@@ -164,22 +164,89 @@ public final class PBKDF2Hasher {
 
     /**
      * Derives raw key bytes from a password and a stored {@link HashedPassword}, 
-     * suitable for session or encryption use.
+     * suitable for vault session or encryption use.
+     * <p>
+     * <b>Critical Security Note:</b> This method is intended for <b>key derivation</b>,
+     * NOT password verification. The derived key should be:
+     * </p>
+     * <ul>
+     *   <li>Used immediately to unlock the vault session</li>
+     *   <li>Never persisted to disk</li>
+     *   <li>Zeroized from memory when the session ends</li>
+     * </ul>
+     * <p>
+     * The caller MUST clear the returned byte array using {@code Arrays.fill(key, (byte) 0)}
+     * when finished.
+     * </p>
      *
      * @param password the password to derive the key from
      * @param stored   the stored hashed password providing salt and iterations
-     * @return a byte array containing the derived key
+     * @return a byte array containing the derived session key (256 bits)
      * @throws NoSuchAlgorithmException if PBKDF2WithHmacSHA256 is not available
      * @throws InvalidKeySpecException  if the key specification is invalid
+     * @throws IllegalArgumentException if password or stored is null
      */
-    public static byte[] deriveKey(char[] password, HashedPassword stored)
-    throws NoSuchAlgorithmException, InvalidKeySpecException
-    {
+    public static byte[] deriveSessionKey(char[] password, HashedPassword stored)
+            throws NoSuchAlgorithmException, InvalidKeySpecException {
+        
+        if (password == null) {
+            throw new IllegalArgumentException("Password cannot be null");
+        }
+        if (stored == null) {
+            throw new IllegalArgumentException("Stored hash cannot be null");
+        }
+
         byte[] salt = Base64.getDecoder().decode(stored.getSalt());
-        PBEKeySpec spec = new PBEKeySpec(password, salt, stored.getIterations(), KEY_LENGTH);
-        SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-        byte[] sessionKey = skf.generateSecret(spec).getEncoded();
-        spec.clearPassword();
-        return sessionKey;
+        PBEKeySpec spec = new PBEKeySpec(password, salt, stored.getIterations(), KEY_LENGTH_BITS);
+        
+        try {
+            SecretKeyFactory factory = SecretKeyFactory.getInstance(stored.getAlgorithm());
+            byte[] sessionKey = factory.generateSecret(spec).getEncoded();
+            
+            // Return key - caller MUST zeroize after use
+            return sessionKey;
+            
+        } finally {
+            spec.clearPassword();
+            Arrays.fill(salt, (byte) 0);
+        }
+    }
+
+    /**
+     * Constant-time byte array comparison to prevent timing attacks.
+     * <p>
+     * While PBKDF2's iteration count makes timing attacks impractical,
+     * this provides defense-in-depth.
+     * </p>
+     *
+     * @param a first byte array
+     * @param b second byte array
+     * @return true if arrays are equal, false otherwise
+     */
+    private static boolean constantTimeEquals(byte[] a, byte[] b) {
+        if (a.length != b.length) {
+            return false;
+        }
+        
+        int result = 0;
+        for (int i = 0; i < a.length; i++) {
+            result |= a[i] ^ b[i];
+        }
+        return result == 0;
+    }
+
+    /**
+     * Validates inputs for hashPassword method.
+     */
+    private static void validateHashPasswordInputs(char[] password, byte[] salt, int iterations) {
+        if (password == null || password.length == 0) {
+            throw new IllegalArgumentException("Password cannot be null or empty");
+        }
+        if (salt == null) {
+            throw new IllegalArgumentException("Salt cannot be null");
+        }
+        if (iterations < 1) {
+            throw new IllegalArgumentException("Iterations must be positive");
+        }
     }
 }
