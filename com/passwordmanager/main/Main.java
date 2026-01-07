@@ -1,9 +1,18 @@
+package com.passwordmanager.main;
 
 import java.io.Console;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
+
+import com.passwordmanager.security.HashedPassword;
+import com.passwordmanager.security.PBKDF2Hasher;
+import com.passwordmanager.storage.VaultStorage;
+import com.passwordmanager.storage.VaultSession;
+import com.passwordmanager.validation.PasswordValidator;
+import com.passwordmanager.validation.ValidationResult;
+
 /**
  * Main entry point for the Vault application.
  * <p>

@@ -1,3 +1,4 @@
+package com.passwordmanager.validation;
 /*TODO:
 this should probably be reworked, since were working on the MASTER KEY complexity checker. not random password.
 BUT, i would leave this for now since it should not stop or slow making the other essential features for the password manager.
@@ -140,7 +141,7 @@ import java.util.List;
         return hit;
       }
 
-      static ValidationResult validate(char[] pwd) {
+      public static ValidationResult validate(char[] pwd) {
         List<String> reasons = new ArrayList<>();
         if (pwd == null || pwd.length == 0) {
           reasons.add("cannot be empty");
