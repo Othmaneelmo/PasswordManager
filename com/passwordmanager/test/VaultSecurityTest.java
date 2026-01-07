@@ -608,6 +608,22 @@ public class VaultSecurityTest {
             
             Arrays.fill(pwd, ' ');
         });
+
+        test("JSON injection resistance", () -> {
+            String maliciousAlgorithm = "PBKDF2\", \"injected\": \"evil";
+            
+            try {
+                VaultStorage.saveMasterKey(maliciousAlgorithm, 100000, "dGVzdA==", "dGVzdA==");
+                
+                HashedPassword loaded = VaultStorage.loadHashedPassword();
+                
+                // Should only get the algorithm up to the first quote
+                assertFalse(loaded.getAlgorithm().contains("injected"), 
+                    "JSON escaping should prevent injection");
+            } catch (Exception e) {
+                // Also acceptable - rejecting the input
+            }
+        });
     }
 
     private static void test(String name, TestRunnable runnable) {
