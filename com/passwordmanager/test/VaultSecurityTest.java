@@ -327,6 +327,30 @@ public class VaultSecurityTest {
 
     private static void runStorageTests() {
         printCategory("STORAGE LAYER");
+
+            test("Save and load master key", () -> {
+            cleanupVault();
+            
+            char[] pwd = "storageTest".toCharArray();
+            HashedPassword original = PBKDF2Hasher.defaultHashPassword(pwd);
+            
+            VaultStorage.saveMasterKey(
+                original.getAlgorithm(),
+                original.getIterations(),
+                original.getSalt(),
+                original.getHash()
+            );
+            
+            HashedPassword loaded = VaultStorage.loadHashedPassword();
+            
+            assertNotNull(loaded, "Loaded hash should not be null");
+            assertEquals(original.getAlgorithm(), loaded.getAlgorithm(), "Algorithm should match");
+            assertEquals(original.getIterations(), loaded.getIterations(), "Iterations should match");
+            assertEquals(original.getSalt(), loaded.getSalt(), "Salt should match");
+            assertEquals(original.getHash(), loaded.getHash(), "Hash should match");
+            
+            Arrays.fill(pwd, ' ');
+        });
     }
 
     private static void test(String name, TestRunnable runnable) {
