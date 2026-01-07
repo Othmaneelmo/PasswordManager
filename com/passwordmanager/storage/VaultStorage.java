@@ -269,3 +269,21 @@ public final class VaultStorage {
             throw new IllegalArgumentException(fieldName + " is not valid Base64: " + e.getMessage());
         }
     }
+
+    /**
+     * Restricts file permissions to owner-only (Unix/Linux systems).
+     * On Windows or unsupported systems, this is a no-op.
+     */
+    private static void restrictFilePermissions(Path file) {
+        try {
+            Set<PosixFilePermission> perms = Set.of(
+                PosixFilePermission.OWNER_READ,
+                PosixFilePermission.OWNER_WRITE
+            );
+            Files.setPosixFilePermissions(file, perms);
+        } catch (UnsupportedOperationException | IOException e) {
+            // POSIX permissions not supported (e.g., Windows)
+            // Future improvement: use Windows ACLs
+        }
+    }
+}
