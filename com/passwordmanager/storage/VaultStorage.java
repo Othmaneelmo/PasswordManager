@@ -169,3 +169,23 @@ public final class VaultStorage {
             throw new IOException("Corrupted vault file: " + e.getMessage(), e);
         }
     }
+
+    /**
+     * Deletes the vault folder and all its contents.
+     * <p>
+     * <b>Warning:</b> This is a destructive operation. Use with extreme caution.
+     * This method is provided for testing or complete vault reset scenarios.
+     * </p>
+     *
+     * @throws IOException if deletion fails
+     */
+    public static void deleteVault() throws IOException {
+        if (Files.exists(VAULT_FOLDER)) {
+            // Delete master key file first
+            if (Files.exists(MASTER_KEY_FILE)) {
+                Files.delete(MASTER_KEY_FILE);
+            }
+            // Delete folder
+            Files.delete(VAULT_FOLDER);
+        }
+    }
