@@ -287,7 +287,6 @@ public final class VaultStorage {
         }
     }
 
-
     /**
      * Restricts folder permissions to owner-only (Unix/Linux systems).
      */
