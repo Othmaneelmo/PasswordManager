@@ -19,7 +19,8 @@ public class VaultSecurityTest {
         System.out.println();
 
         // Example usage placeholder
-        // test("Example test", () -> { assertTrue(true, "Example"); });
+        // printCategory("EXAMPLE CATEGORY");
+        // test("Example test", () -> assertTrue(true, "Example"));
 
         System.out.println();
         System.out.println("=".repeat(80));
@@ -47,6 +48,13 @@ public class VaultSecurityTest {
             System.out.println("✗ ERROR");
             System.out.println("      Exception: " + e.getClass().getSimpleName() + ": " + e.getMessage());
         }
+    }
+
+    private static void printCategory(String category) {
+        System.out.println();
+        System.out.println("─".repeat(80));
+        System.out.println("  " + category);
+        System.out.println("─".repeat(80));
     }
 
     private static void assertTrue(boolean condition, String message) {
