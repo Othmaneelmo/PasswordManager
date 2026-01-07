@@ -91,6 +91,20 @@ public class VaultSecurityTest {
             assertFalse(verified, "Wrong password should fail verification");
             Arrays.fill(wrong, ' ');
         });
+        test("Session key derivation consistency", () -> {
+            char[] pwd = "sessionKeyTest".toCharArray();
+            HashedPassword stored = PBKDF2Hasher.defaultHashPassword(pwd);
+            
+            byte[] key1 = PBKDF2Hasher.deriveSessionKey(pwd, stored);
+            byte[] key2 = PBKDF2Hasher.deriveSessionKey(pwd, stored);
+            
+            assertTrue(Arrays.equals(key1, key2), 
+                "Same password should derive identical session keys");
+            
+            Arrays.fill(pwd, ' ');
+            Arrays.fill(key1, (byte) 0);
+            Arrays.fill(key2, (byte) 0);
+        });
     }
 
     private static void test(String name, TestRunnable runnable) {
