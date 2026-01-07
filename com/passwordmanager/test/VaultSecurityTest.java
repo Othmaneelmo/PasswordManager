@@ -578,6 +578,16 @@ public class VaultSecurityTest {
             Arrays.fill(wrong1, ' ');
             Arrays.fill(wrong2, ' ');
         });
+
+        test("Brute force resistance (high iteration count)", () -> {
+            char[] pwd = "bruteForceTest".toCharArray();
+            HashedPassword hp = PBKDF2Hasher.defaultHashPassword(pwd);
+            
+            assertTrue(hp.getIterations() >= 600000, 
+                "Iteration count should be >= 600,000 for brute force resistance");
+            
+            Arrays.fill(pwd, ' ');
+        });
     }
 
     private static void test(String name, TestRunnable runnable) {
