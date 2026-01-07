@@ -363,7 +363,14 @@ public class VaultSecurityTest {
             
             Arrays.fill(pwd, ' ');
         });
-        
+
+        test("Load non-existent vault returns null", () -> {
+            cleanupVault();
+            
+            HashedPassword loaded = VaultStorage.loadHashedPassword();
+            assertNull(loaded, "Loading non-existent vault should return null");
+        });
+
     }
 
     private static void test(String name, TestRunnable runnable) {
