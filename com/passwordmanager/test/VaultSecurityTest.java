@@ -26,6 +26,11 @@ public class VaultSecurityTest {
 
         runCryptographicTests();
         runMemorySafetyTests();
+        runStateMachineTests();
+        //runStorageTests();
+        //runConcurrencyTests();
+        //runAttackResistanceTests();
+        //runEdgeCaseTests();
 
         System.out.println();
         System.out.println("=".repeat(80));
@@ -205,8 +210,13 @@ public class VaultSecurityTest {
             VaultSession.lock();
             Arrays.fill(pwd, ' ');
         });
-    
     }
+
+    // ==================== STATE MACHINE TESTS ====================
+    private static void runStateMachineTests() {
+        printCategory("STATE MACHINE INVARIANTS");
+    }
+
     private static void test(String name, TestRunnable runnable) {
         testsRun++;
         System.out.print("  [" + testsRun + "] " + name + " ... ");
