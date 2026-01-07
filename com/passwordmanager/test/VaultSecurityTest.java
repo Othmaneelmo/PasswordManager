@@ -380,6 +380,15 @@ public class VaultSecurityTest {
             }
         });
 
+        test("Reject invalid iterations", () -> {
+            try {
+                VaultStorage.saveMasterKey("PBKDF2WithHmacSHA256", 0, "validSalt==", "validHash==");
+                fail("Should reject zero iterations");
+            } catch (IllegalArgumentException e) {
+                // Expected
+            }
+        });
+
     }
 
     private static void test(String name, TestRunnable runnable) {
