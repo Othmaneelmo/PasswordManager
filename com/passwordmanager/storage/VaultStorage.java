@@ -1,21 +1,56 @@
 package com.passwordmanager.storage;
+
 import com.passwordmanager.security.HashedPassword;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.Base64;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Handles persistent storage for the vault, including saving and loading the master key hash.
  * <p>
- * The vault is stored under a dedicated folder ("Vault") and uses a JSON file to persist 
- * the master key's algorithm, iterations, salt, and hash. Future expansions can add additional
- * files for account data or encrypted storage.
+ * <b>Storage Design:</b>
+ * </p>
+ * <ul>
+ *   <li>The vault is stored under a dedicated folder ("Vault")</li>
+ *   <li>Master key metadata is stored in JSON format</li>
+ *   <li><b>Only non-secret data is persisted</b> (algorithm, iterations, salt, hash)</li>
+ *   <li>Derived keys and plaintext passwords are NEVER written to disk</li>
+ * </ul>
+ * 
+ * <p><b>Security Guarantees:</b></p>
+ * <ul>
+ *   <li>No plaintext passwords stored</li>
+ *   <li>No derived session keys stored</li>
+ *   <li>JSON validation prevents injection attacks</li>
+ *   <li>File permissions enforced where supported</li>
+ *   <li>Corrupted files fail safely</li>
+ * </ul>
+ * 
+ * <p><b>Future Expansion:</b></p>
+ * <p>
+ * Additional files can be added for account data or encrypted storage
+ * (e.g., {@code accounts.enc}, {@code files.enc}).
  * </p>
  */
-public class VaultStorage {
-    private static final Path vaultFolder = Path.of("Vault");   // base folder
-    private static final Path masterKeyFile = vaultFolder.resolve("masterKey.json"); // file path
-    // private static final Path otherFile = vaultFolder.resolve("other.json"); // optional future files
+public final class VaultStorage {
+    private static final Path VAULT_FOLDER = Path.of("Vault");
+    private static final Path MASTER_KEY_FILE = VAULT_FOLDER.resolve("masterKey.json");
+    
+    // JSON field patterns for safe extraction
+    private static final Pattern ALGORITHM_PATTERN = Pattern.compile("\"algorithm\"\\s*:\\s*\"([^\"]+)\"");
+    private static final Pattern ITERATIONS_PATTERN = Pattern.compile("\"iterations\"\\s*:\\s*(\\d+)");
+    private static final Pattern SALT_PATTERN = Pattern.compile("\"salt\"\\s*:\\s*\"([^\"]+)\"");
+    private static final Pattern HASH_PATTERN = Pattern.compile("\"hash\"\\s*:\\s*\"([^\"]+)\"");
+
+    // Prevent instantiation
+    private VaultStorage() {
+        throw new AssertionError("VaultStorage is a utility class and should not be instantiated");
+    }
 
     /**
      * Checks whether the vault already exists.
