@@ -54,11 +54,14 @@ public final class VaultStorage {
 
     /**
      * Checks whether the vault already exists.
+     * <p>
+     * A vault is considered to exist if the master key file is present and readable.
+     * </p>
      *
      * @return {@code true} if the master key file exists, {@code false} otherwise
      */
     public static boolean exists() {
-        return Files.exists(masterKeyFile);
+        return Files.exists(MASTER_KEY_FILE) && Files.isReadable(MASTER_KEY_FILE);
     }
 
     /**
