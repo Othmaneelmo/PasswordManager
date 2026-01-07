@@ -1,3 +1,5 @@
+package com.passwordmanager.storage;
+import com.passwordmanager.security.HashedPassword;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

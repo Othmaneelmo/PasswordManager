@@ -1,3 +1,4 @@
+package com.passwordmanager.security;
 /**
  * Immutable data holder for a hashed password.
  * <p>

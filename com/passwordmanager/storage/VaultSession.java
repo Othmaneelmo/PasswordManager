@@ -1,3 +1,4 @@
+package com.passwordmanager.storage;
 /*The following class:
  * 
  * VaultSession manages the unlocked state of the vault.
@@ -7,9 +8,9 @@
  * - When locked, the key is securely wiped and no operations are possible.
 */
 
+import java.util.Arrays;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import java.util.Arrays;
 
 /**
  * Manages the unlocked state of the vault.

@@ -1,3 +1,4 @@
+package com.passwordmanager.validation;
 import java.util.List;
       /* Simple container so we can add more detail later */
 public final class ValidationResult {
@@ -9,11 +10,11 @@ public final class ValidationResult {
         this.messages = messages; 
     }
 
-    boolean ok(){
+    public boolean ok(){
         return ok;
     }
 
-    List<String> messages(){
+    public List<String> messages(){
         return messages;
     }
 }
