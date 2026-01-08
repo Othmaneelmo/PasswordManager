@@ -665,6 +665,20 @@ public class VaultSecurityTest {
             Arrays.fill(longPwd, ' ');
         });
 
+        test("Unicode password support", () -> {
+            char[] unicodePwd = "пароль密码🔐".toCharArray();
+            
+            try {
+                HashedPassword hp = PBKDF2Hasher.defaultHashPassword(unicodePwd);
+                assertTrue(PBKDF2Hasher.verifyPassword(unicodePwd, hp), 
+                    "Unicode passwords should work correctly");
+            } catch (Exception e) {
+                fail("Should handle Unicode passwords: " + e.getMessage());
+            }
+            
+            Arrays.fill(unicodePwd, ' ');
+        });
+
     }
 
     private static void test(String name, TestRunnable runnable) {
