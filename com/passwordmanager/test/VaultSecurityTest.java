@@ -736,6 +736,26 @@ public class VaultSecurityTest {
             Arrays.fill(pwd, ' ');
         });
 
+        test("Session unlock with wrong key length after truncation", () -> {
+            byte[] key = new byte[32];
+            Arrays.fill(key, (byte) 0xFF);
+            
+            VaultSession.unlock(key);
+            VaultSession.lock();
+            
+            // Now try with truncated version
+            byte[] truncated = Arrays.copyOf(key, 16);
+            
+            try {
+                VaultSession.unlock(truncated);
+                fail("Should reject truncated key");
+            } catch (IllegalArgumentException e) {
+                // Expected
+            }
+            
+            Arrays.fill(key, (byte) 0);
+        });
+
     }
 
     private static void test(String name, TestRunnable runnable) {
