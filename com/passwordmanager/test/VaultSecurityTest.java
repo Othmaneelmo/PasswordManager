@@ -83,8 +83,8 @@ public class VaultSecurityTest {
             char[] pwd = "test123@ABC".toCharArray();
             byte[] salt = PBKDF2Hasher.generateSalt();
             
-            HashedPassword h1 = PBKDF2Hasher.hashPassword(pwd, salt, 100000); //min iterations count
-            HashedPassword h2 = PBKDF2Hasher.hashPassword(pwd, salt, 100000); //min iterations count
+            HashedPassword h1 = PBKDF2Hasher.hashPassword(pwd, salt, 100000);
+            HashedPassword h2 = PBKDF2Hasher.hashPassword(pwd, salt, 100000);
             
             assertTrue(h1.getHash().equals(h2.getHash()), 
                 "Same password + salt + iterations should produce identical hash");
@@ -180,6 +180,9 @@ public class VaultSecurityTest {
 
     private static void runMemorySafetyTests() {
         printCategory("MEMORY SAFETY");
+        
+        // Ensure clean state before memory safety tests
+        VaultSession.lock();
 
         test("Session key zeroization on lock", () -> {
             char[] pwd = "zeroizeTest".toCharArray();
@@ -232,21 +235,28 @@ public class VaultSecurityTest {
         });
 
         test("Session key zeroization after unlock", () -> {
+            VaultSession.lock(); // Ensure locked state
+            
             char[] pwd = "unlockZeroTest".toCharArray();
             HashedPassword stored = PBKDF2Hasher.defaultHashPassword(pwd);
             byte[] key = PBKDF2Hasher.deriveSessionKey(pwd, stored);
+            
+            // Make a copy of the key to verify zeroization
+            byte[] keyCopy = Arrays.copyOf(key, key.length);
             
             VaultSession.unlock(key);
             
             // Caller should zeroize the key array after unlock
             Arrays.fill(key, (byte) 0);
             
+            // Verify the original key array was zeroized
             for (byte b : key) {
                 assertEquals(0, b, "Session key should be zeroized after use");
             }
             
             VaultSession.lock();
             Arrays.fill(pwd, ' ');
+            Arrays.fill(keyCopy, (byte) 0);
         });
     }
 
@@ -254,6 +264,9 @@ public class VaultSecurityTest {
 
     private static void runStateMachineTests() {
         printCategory("STATE MACHINE INVARIANTS");
+        
+        // Ensure clean state before state machine tests
+        VaultSession.lock();
 
         test("Vault starts locked", () -> {
             assertFalse(VaultSession.isUnlocked(), "Vault should start in locked state");
@@ -261,6 +274,8 @@ public class VaultSecurityTest {
         });
 
         test("Cannot unlock twice", () -> {
+            VaultSession.lock(); // Ensure locked state
+            
             char[] pwd = "doubleUnlock".toCharArray();
             HashedPassword stored = PBKDF2Hasher.defaultHashPassword(pwd);
             byte[] key = PBKDF2Hasher.deriveSessionKey(pwd, stored);
