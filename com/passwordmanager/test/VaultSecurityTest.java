@@ -10,13 +10,25 @@ import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * Advanced test suite for the password manager vault core.
+ * <p>
+ * Tests cover:
+ * - Cryptographic correctness
+ * - Memory safety and cleanup
+ * - State machine invariants
+ * - Concurrent access scenarios
+ * - Attack resistance
+ * - Error handling and edge cases
+ * </p>
+ * 
+ * <p><b>Usage:</b></p>
+ * <pre>
+ * javac com/passwordmanager/test/VaultSecurityTest.java
+ * java com.passwordmanager.test.VaultSecurityTest
+ * </pre>
  */
 public class VaultSecurityTest {
 
@@ -30,8 +42,10 @@ public class VaultSecurityTest {
         System.out.println("=".repeat(80));
         System.out.println();
 
+        // Clean slate before tests
         cleanupVault();
 
+        // Run all test categories
         runCryptographicTests();
         runMemorySafetyTests();
         runStateMachineTests();
@@ -40,14 +54,27 @@ public class VaultSecurityTest {
         runAttackResistanceTests();
         runEdgeCaseTests();
 
+        // Summary
         System.out.println();
         System.out.println("=".repeat(80));
         System.out.println("TEST SUMMARY");
         System.out.println("=".repeat(80));
         System.out.println("Total tests run: " + testsRun);
-        System.out.println("Passed: " + testsPassed);
-        System.out.println("Failed: " + testsFailed);
+        System.out.println("Passed: " + testsPassed + " ✓");
+        System.out.println("Failed: " + testsFailed + " ✗");
+        System.out.println("Success rate: " + (testsRun > 0 ? (testsPassed * 100 / testsRun) : 0) + "%");
+        
+        if (testsFailed == 0) {
+            System.out.println("\n🎉 ALL TESTS PASSED!");
+        } else {
+            System.out.println("\n⚠️  SOME TESTS FAILED - Review output above");
+        }
+
+        // Cleanup
+        cleanupVault();
     }
+
+    // ==================== CRYPTOGRAPHIC TESTS ====================
 
     private static void runCryptographicTests() {
         printCategory("CRYPTOGRAPHIC CORRECTNESS");
@@ -55,22 +82,21 @@ public class VaultSecurityTest {
         test("Hash determinism", () -> {
             char[] pwd = "test123@ABC".toCharArray();
             byte[] salt = PBKDF2Hasher.generateSalt();
-
-            HashedPassword h1 = PBKDF2Hasher.hashPassword(pwd, salt, 100000);
-            HashedPassword h2 = PBKDF2Hasher.hashPassword(pwd, salt, 100000);
-
-            assertTrue(h1.getHash().equals(h2.getHash()),
-                    "Same password + salt + iterations should produce identical hash");
-
+            
+            HashedPassword h1 = PBKDF2Hasher.hashPassword(pwd, salt, 100000); //min iterations count
+            HashedPassword h2 = PBKDF2Hasher.hashPassword(pwd, salt, 100000); //min iterations count
+            
+            assertTrue(h1.getHash().equals(h2.getHash()), 
+                "Same password + salt + iterations should produce identical hash");
             Arrays.fill(pwd, ' ');
         });
 
         test("Salt uniqueness", () -> {
             byte[] salt1 = PBKDF2Hasher.generateSalt();
             byte[] salt2 = PBKDF2Hasher.generateSalt();
-
-            assertFalse(Arrays.equals(salt1, salt2),
-                    "Two generated salts should be different");
+            
+            assertFalse(Arrays.equals(salt1, salt2), 
+                "Two generated salts should be different");
         });
 
         test("Different salts produce different hashes", () -> {
@@ -86,7 +112,7 @@ public class VaultSecurityTest {
             Arrays.fill(pwd, ' ');
         });
 
-                test("Password verification - correct password", () -> {
+        test("Password verification - correct password", () -> {
             char[] pwd = "correctPassword123!".toCharArray();
             HashedPassword stored = PBKDF2Hasher.defaultHashPassword(pwd);
             
@@ -95,6 +121,7 @@ public class VaultSecurityTest {
             assertTrue(verified, "Correct password should verify successfully");
             Arrays.fill(pwd, ' ');
         });
+
         test("Password verification - incorrect password", () -> {
             char[] pwd = "correctPassword123!".toCharArray();
             HashedPassword stored = PBKDF2Hasher.defaultHashPassword(pwd);
@@ -106,6 +133,7 @@ public class VaultSecurityTest {
             assertFalse(verified, "Wrong password should fail verification");
             Arrays.fill(wrong, ' ');
         });
+
         test("Session key derivation consistency", () -> {
             char[] pwd = "sessionKeyTest".toCharArray();
             HashedPassword stored = PBKDF2Hasher.defaultHashPassword(pwd);
@@ -132,7 +160,8 @@ public class VaultSecurityTest {
             Arrays.fill(pwd, ' ');
             Arrays.fill(key, (byte) 0);
         });
-                test("Hash output is Base64 encoded", () -> {
+
+        test("Hash output is Base64 encoded", () -> {
             char[] pwd = "base64Test".toCharArray();
             HashedPassword stored = PBKDF2Hasher.defaultHashPassword(pwd);
             
@@ -146,6 +175,7 @@ public class VaultSecurityTest {
             Arrays.fill(pwd, ' ');
         });
     }
+
     // ==================== MEMORY SAFETY TESTS ====================
 
     private static void runMemorySafetyTests() {
@@ -221,6 +251,7 @@ public class VaultSecurityTest {
     }
 
     // ==================== STATE MACHINE TESTS ====================
+
     private static void runStateMachineTests() {
         printCategory("STATE MACHINE INVARIANTS");
 
@@ -327,8 +358,7 @@ public class VaultSecurityTest {
             } catch (IllegalArgumentException e) {
                 // Expected
             }
-        });  
-
+        });
     }
 
     // ==================== STORAGE TESTS ====================
@@ -336,7 +366,7 @@ public class VaultSecurityTest {
     private static void runStorageTests() {
         printCategory("STORAGE LAYER");
 
-            test("Save and load master key", () -> {
+        test("Save and load master key", () -> {
             cleanupVault();
             
             char[] pwd = "storageTest".toCharArray();
@@ -359,6 +389,7 @@ public class VaultSecurityTest {
             
             Arrays.fill(pwd, ' ');
         });
+
         test("Vault exists check", () -> {
             cleanupVault();
             assertFalse(VaultStorage.exists(), "Vault should not exist initially");
@@ -534,6 +565,8 @@ public class VaultSecurityTest {
             Arrays.fill(key, (byte) 0);
         });
     }
+
+    // ==================== ATTACK RESISTANCE TESTS ====================
 
     private static void runAttackResistanceTests() {
         printCategory("ATTACK RESISTANCE");
@@ -712,6 +745,7 @@ public class VaultSecurityTest {
             }
         });
 
+
         test("Verify with different algorithm", () -> {
             char[] pwd = "algoTest".toCharArray();
             HashedPassword stored = PBKDF2Hasher.defaultHashPassword(pwd);
@@ -755,13 +789,21 @@ public class VaultSecurityTest {
             
             Arrays.fill(key, (byte) 0);
         });
+    }
 
+    // ==================== TEST UTILITIES ====================
+
+    private static void printCategory(String category) {
+        System.out.println();
+        System.out.println("─".repeat(80));
+        System.out.println("  " + category);
+        System.out.println("─".repeat(80));
     }
 
     private static void test(String name, TestRunnable runnable) {
         testsRun++;
         System.out.print("  [" + testsRun + "] " + name + " ... ");
-
+        
         try {
             runnable.run();
             testsPassed++;
@@ -774,24 +816,6 @@ public class VaultSecurityTest {
             testsFailed++;
             System.out.println("✗ ERROR");
             System.out.println("      Exception: " + e.getClass().getSimpleName() + ": " + e.getMessage());
-        }
-    }
-
-    private static void printCategory(String category) {
-        System.out.println();
-        System.out.println("─".repeat(80));
-        System.out.println("  " + category);
-        System.out.println("─".repeat(80));
-    }
-
-    private static void cleanupVault() {
-        try {
-            VaultSession.lock();
-            if (VaultStorage.exists()) {
-                VaultStorage.deleteVault();
-            }
-        } catch (Exception e) {
-            // Ignore cleanup errors
         }
     }
 
@@ -808,7 +832,9 @@ public class VaultSecurityTest {
     }
 
     private static void assertEquals(Object expected, Object actual, String message) {
-        if (expected == null && actual == null) return;
+        if (expected == null && actual == null) {
+            return;
+        }
         if (expected == null || !expected.equals(actual)) {
             throw new AssertionError(message + " (expected: " + expected + ", actual: " + actual + ")");
         }
@@ -830,9 +856,19 @@ public class VaultSecurityTest {
         throw new AssertionError(message);
     }
 
+    private static void cleanupVault() {
+        try {
+            VaultSession.lock();
+            if (VaultStorage.exists()) {
+                VaultStorage.deleteVault();
+            }
+        } catch (Exception e) {
+            // Ignore cleanup errors
+        }
+    }
+
     @FunctionalInterface
     interface TestRunnable {
         void run() throws Exception;
     }
-
 }
