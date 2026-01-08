@@ -693,6 +693,24 @@ public class VaultSecurityTest {
             Arrays.fill(pwdWithNull, ' ');
         });
 
+        test("Maximum iteration count", () -> {
+            char[] pwd = "maxIterTest".toCharArray();
+            byte[] salt = PBKDF2Hasher.generateSalt();
+        
+            try {
+                PBKDF2Hasher.hashPassword(pwd, salt, Integer.MAX_VALUE);
+                fail("Should reject iteration count above configured maximum");
+            } catch (IllegalArgumentException e) {
+                // Expected: explicit rejection of unreasonable iteration count
+                assertTrue(
+                    e.getMessage().toLowerCase().contains("iteration"),
+                    "Exception message should mention iteration count"
+                );
+            } finally {
+                Arrays.fill(pwd, ' ');
+            }
+        });
+
     }
 
     private static void test(String name, TestRunnable runnable) {
