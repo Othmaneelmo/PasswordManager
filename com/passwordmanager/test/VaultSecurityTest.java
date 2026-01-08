@@ -679,6 +679,20 @@ public class VaultSecurityTest {
             Arrays.fill(unicodePwd, ' ');
         });
 
+        test("Password with null bytes", () -> {
+            char[] pwdWithNull = {'a', 'b', '\0', 'c', 'd'};
+            
+            try {
+                HashedPassword hp = PBKDF2Hasher.defaultHashPassword(pwdWithNull);
+                assertTrue(PBKDF2Hasher.verifyPassword(pwdWithNull, hp), 
+                    "Passwords with null bytes should work");
+            } catch (Exception e) {
+                fail("Should handle null bytes in password: " + e.getMessage());
+            }
+            
+            Arrays.fill(pwdWithNull, ' ');
+        });
+
     }
 
     private static void test(String name, TestRunnable runnable) {
