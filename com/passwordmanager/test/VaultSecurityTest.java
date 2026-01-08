@@ -641,6 +641,15 @@ public class VaultSecurityTest {
                 // Expected
             }
         });
+
+        test("Null password rejection", () -> {
+            try {
+                PBKDF2Hasher.defaultHashPassword(null);
+                fail("Should reject null password");
+            } catch (IllegalArgumentException e) {
+                // Expected
+            }
+        });
     }
 
     private static void test(String name, TestRunnable runnable) {
