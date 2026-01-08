@@ -650,6 +650,21 @@ public class VaultSecurityTest {
                 // Expected
             }
         });
+
+        test("Very long password", () -> {
+            char[] longPwd = new char[10000];
+            Arrays.fill(longPwd, 'a');
+            
+            try {
+                HashedPassword hp = PBKDF2Hasher.defaultHashPassword(longPwd);
+                assertNotNull(hp, "Should handle very long passwords");
+            } catch (Exception e) {
+                fail("Should handle very long passwords: " + e.getMessage());
+            }
+            
+            Arrays.fill(longPwd, ' ');
+        });
+
     }
 
     private static void test(String name, TestRunnable runnable) {
