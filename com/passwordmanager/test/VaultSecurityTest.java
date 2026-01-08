@@ -7,6 +7,7 @@ import com.passwordmanager.storage.VaultStorage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.concurrent.CountDownLatch;
@@ -709,6 +710,30 @@ public class VaultSecurityTest {
             } finally {
                 Arrays.fill(pwd, ' ');
             }
+        });
+
+        test("Verify with different algorithm", () -> {
+            char[] pwd = "algoTest".toCharArray();
+            HashedPassword stored = PBKDF2Hasher.defaultHashPassword(pwd);
+            
+            // Manually create a HashedPassword with different algorithm
+            HashedPassword fake = new HashedPassword(
+                "MD5", // Wrong algorithm
+                stored.getIterations(),
+                stored.getSalt(),
+                stored.getHash()
+            );
+            
+            try {
+                PBKDF2Hasher.verifyPassword(pwd, fake);
+                fail("Should fail with wrong algorithm");
+            } catch (NoSuchAlgorithmException e) {
+                // Expected
+            } catch (Exception e) {
+                // Also acceptable
+            }
+            
+            Arrays.fill(pwd, ' ');
         });
 
     }
