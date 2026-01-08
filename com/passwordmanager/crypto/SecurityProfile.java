@@ -1,5 +1,5 @@
 package com.passwordmanager.crypto;
 
-public class SecurityProfile {
+public enum  SecurityProfile {
 
 }
