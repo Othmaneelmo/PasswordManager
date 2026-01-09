@@ -55,13 +55,17 @@ public final class VaultStorage {
     /**
      * Checks whether the vault already exists.
      * <p>
-     * A vault is considered to exist if the master key file is present and readable.
+     * A vault is considered to exist if the master key file is present, readable, and contains valid data.
      * </p>
      *
-     * @return {@code true} if the master key file exists, {@code false} otherwise
+     * @return {@code true} if the master key file exists and is valid, {@code false} otherwise
      */
     public static boolean exists() {
-        return Files.exists(MASTER_KEY_FILE) && Files.isReadable(MASTER_KEY_FILE);
+        try {
+            return loadHashedPassword() != null;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     /**
@@ -218,13 +222,7 @@ public final class VaultStorage {
      * Builds JSON string for master key storage.
      */
     private static String buildMasterKeyJson(String algorithm, int iterations, String salt, String hash) {
-        return String.format(
-            "{\n" +
-            "  \"algorithm\": \"%s\",\n" +
-            "  \"iterations\": %d,\n" +
-            "  \"salt\": \"%s\",\n" +
-            "  \"hash\": \"%s\"\n" +
-            "}",
+        return String.format("{\n  \"algorithm\": \"%s\",\n  \"iterations\": %d,\n  \"salt\": \"%s\",\n  \"hash\": \"%s\"\n}",
             escapeJsonString(algorithm),
             iterations,
             escapeJsonString(salt),
