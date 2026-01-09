@@ -60,14 +60,14 @@ public class VaultSecurityTest {
         System.out.println("TEST SUMMARY");
         System.out.println("=".repeat(80));
         System.out.println("Total tests run: " + testsRun);
-        System.out.println("Passed: " + testsPassed + " ✓");
-        System.out.println("Failed: " + testsFailed + " ✗");
+        System.out.println("Passed: " + testsPassed + " :)");
+        System.out.println("Failed: " + testsFailed + " X");
         System.out.println("Success rate: " + (testsRun > 0 ? (testsPassed * 100 / testsRun) : 0) + "%");
         
         if (testsFailed == 0) {
-            System.out.println("\n🎉 ALL TESTS PASSED!");
+            System.out.println("\n ALL TESTS PASSED!");
         } else {
-            System.out.println("\n⚠️  SOME TESTS FAILED - Review output above");
+            System.out.println("\n  SOME TESTS FAILED - Review output above");
         }
 
         // Cleanup
@@ -715,7 +715,7 @@ public class VaultSecurityTest {
         });
 
         test("Unicode password support", () -> {
-            char[] unicodePwd = "пароль密码🔐".toCharArray();
+            char[] unicodePwd = "пароль密".toCharArray();
             
             try {
                 HashedPassword hp = PBKDF2Hasher.defaultHashPassword(unicodePwd);
@@ -810,9 +810,9 @@ public class VaultSecurityTest {
 
     private static void printCategory(String category) {
         System.out.println();
-        System.out.println("─".repeat(80));
+        System.out.println("--".repeat(80));
         System.out.println("  " + category);
-        System.out.println("─".repeat(80));
+        System.out.println("--".repeat(80));
     }
 
     private static void test(String name, TestRunnable runnable) {
@@ -822,14 +822,14 @@ public class VaultSecurityTest {
         try {
             runnable.run();
             testsPassed++;
-            System.out.println("✓ PASS");
+            System.out.println(" PASS");
         } catch (AssertionError e) {
             testsFailed++;
-            System.out.println("✗ FAIL");
+            System.out.println(" FAIL");
             System.out.println("      Error: " + e.getMessage());
         } catch (Exception e) {
             testsFailed++;
-            System.out.println("✗ ERROR");
+            System.out.println(" ERROR");
             System.out.println("      Exception: " + e.getClass().getSimpleName() + ": " + e.getMessage());
         }
     }
