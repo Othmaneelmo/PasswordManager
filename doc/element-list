@@ -1,4 +1,8 @@
+unnamed package
+com.passwordmanager.crypto
+com.passwordmanager.demo
 com.passwordmanager.main
 com.passwordmanager.security
 com.passwordmanager.storage
+com.passwordmanager.test
 com.passwordmanager.validation
