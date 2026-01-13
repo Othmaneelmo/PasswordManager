@@ -25,8 +25,8 @@ import javax.crypto.spec.SecretKeySpec;
  *   <li>All key material is zeroized on {@code lock()}</li>
  * </ul>
  * <p>
- * This class uses static methods to represent a single global vault session.
- * In future versions, this could be refactored to support multiple vault instances.
+ * This class provides both static methods (for backward compatibility) and
+ * a singleton instance (for dependency injection).
  * </p>
  * 
  * <p><b>Security Guarantees:</b></p>
@@ -36,14 +36,35 @@ import javax.crypto.spec.SecretKeySpec;
  *   <li>No operations possible on locked vault</li>
  *   <li>State transitions are atomic and fail-safe</li>
  * </ul>
+ * 
+ * <p><b>Usage:</b></p>
+ * <pre>
+ * // Static usage (backward compatible)
+ * VaultSession.unlock(keyBytes);
+ * VaultSession.lock();
+ * 
+ * // Instance usage (for dependency injection)
+ * VaultSession session = VaultSession.INSTANCE;
+ * session.unlock(keyBytes);
+ * session.lock();
+ * </pre>
  */
 public final class VaultSession {
+    /**
+     * Singleton instance for dependency injection.
+     * <p>
+     * Use this constant to pass VaultSession to features and other components
+     * that should not use static methods.
+     * </p>
+     */
+    public static final VaultSession INSTANCE = new VaultSession();
+
     private static volatile boolean unlocked = false;
     private static volatile SecretKey vaultSessionKey = null;
 
-    // Prevent instantiation
+    // Private constructor prevents external instantiation
     private VaultSession() {
-        throw new AssertionError("VaultSession is a static utility and should not be instantiated");
+        // Singleton - only one instance via INSTANCE constant
     }
 
     /**
@@ -66,7 +87,7 @@ public final class VaultSession {
      * @throws IllegalStateException if the vault is already unlocked
      * @throws IllegalArgumentException if keyBytes is null or not 32 bytes
      */
-    public static synchronized void unlock(byte[] keyBytes) {
+    public synchronized void unlock(byte[] keyBytes) {
         if (unlocked) {
             throw new IllegalStateException("Vault is already unlocked");
         }
@@ -95,7 +116,7 @@ public final class VaultSession {
      * the reference is cleared.
      * </p>
      */
-    public static synchronized void lock() {
+    public synchronized void lock() {
         if (vaultSessionKey != null) {
             // Attempt to zeroize raw key bytes if accessible
             byte[] keyBytes = vaultSessionKey.getEncoded();
@@ -115,7 +136,7 @@ public final class VaultSession {
      *
      * @return {@code true} if the vault is unlocked, {@code false} otherwise
      */
-    public static boolean isUnlocked() {
+    public boolean isUnlocked() {
         return unlocked;
     }
 
@@ -133,7 +154,7 @@ public final class VaultSession {
      * @return the AES {@link SecretKey} for the current session
      * @throws IllegalStateException if the vault is locked
      */
-    public static synchronized SecretKey getVaultSessionKey() {
+    public synchronized SecretKey getVaultSessionKey() {
         if (!unlocked || vaultSessionKey == null) {
             throw new IllegalStateException("Vault is locked. Call unlock() first.");
         }
@@ -148,7 +169,7 @@ public final class VaultSession {
      *
      * @return "LOCKED" or "UNLOCKED"
      */
-    public static String getState() {
+    public String getState() {
         return unlocked ? "UNLOCKED" : "LOCKED";
     }
 }
