@@ -47,7 +47,7 @@ public class CryptoDemo {
             VaultSession.unlock(sessionKey);
             Arrays.fill(masterPassword, ' ');
             Arrays.fill(sessionKey, (byte) 0);
-            System.out.println("✓ Vault unlocked");
+            System.out.println(" Vault unlocked");
             System.out.println();
 
             // Get the session key for encryption
@@ -69,7 +69,7 @@ public class CryptoDemo {
             VaultSession.lock();
             System.out.println();
             System.out.println("=".repeat(80));
-            System.out.println("✓ Demo completed successfully");
+            System.out.println(" Demo completed successfully");
             System.out.println("=".repeat(80));
 
         } catch (Exception e) {
@@ -98,7 +98,7 @@ public class CryptoDemo {
 
         // Encrypt
         EncryptionResult encrypted = provider.encrypt(plaintext, vaultKey);
-        System.out.println("✓ Encrypted successfully");
+        System.out.println(" Encrypted successfully");
         System.out.println("  IV size: " + encrypted.getIv().length + " bytes");
         System.out.println("  Ciphertext size: " + encrypted.getCiphertextSize() + " bytes");
         System.out.println("  Overhead: " + encrypted.getOverheadBytes() + " bytes");
@@ -106,12 +106,12 @@ public class CryptoDemo {
         // Decrypt
         byte[] decrypted = provider.decrypt(encrypted, vaultKey);
         String decryptedMessage = new String(decrypted, StandardCharsets.UTF_8);
-        System.out.println("✓ Decrypted successfully");
+        System.out.println(" Decrypted successfully");
         System.out.println("Decrypted plaintext: \"" + decryptedMessage + "\"");
 
         // Verify
         boolean matches = Arrays.equals(plaintext, decrypted);
-        System.out.println("Match: " + (matches ? "✓ YES" : "✗ NO"));
+        System.out.println("Match: " + (matches ? " YES" : " NO"));
 
         // Cleanup
         Arrays.fill(plaintext, (byte) 0);
@@ -152,7 +152,7 @@ public class CryptoDemo {
 
             // Verify
             boolean matches = Arrays.equals(data, decrypted);
-            System.out.println("  Verification: " + (matches ? "✓ PASS" : "✗ FAIL"));
+            System.out.println("  Verification: " + (matches ? " PASS" : " FAIL"));
 
             // Cleanup
             Arrays.fill(decrypted, (byte) 0);
@@ -193,9 +193,9 @@ public class CryptoDemo {
 
         try {
             provider.decrypt(tampered, vaultKey);
-            System.out.println("  ✗ FAIL: Should have detected tampering");
+            System.out.println("   FAIL: Should have detected tampering");
         } catch (GeneralSecurityException e) {
-            System.out.println("  ✓ PASS: Tampering detected - " + e.getClass().getSimpleName());
+            System.out.println("   PASS: Tampering detected - " + e.getClass().getSimpleName());
         }
 
         // Test 2: IV uniqueness
@@ -204,12 +204,12 @@ public class CryptoDemo {
         EncryptionResult enc2 = provider.encrypt(data, vaultKey);
         boolean sameIv = Arrays.equals(enc1.getIv(), enc2.getIv());
         System.out.println("  Same IV: " + sameIv);
-        System.out.println("  " + (sameIv ? "✗ FAIL: IVs should be unique" : "✓ PASS: IVs are unique"));
+        System.out.println("  " + (sameIv ? " FAIL: IVs should be unique" : " PASS: IVs are unique"));
 
         // Test 3: Different ciphertexts for same plaintext
         boolean sameCiphertext = Arrays.equals(enc1.getCiphertext(), enc2.getCiphertext());
         System.out.println("  Same ciphertext: " + sameCiphertext);
-        System.out.println("  " + (sameCiphertext ? "✗ FAIL: Should produce different ciphertexts" : "✓ PASS: Different ciphertexts"));
+        System.out.println("  " + (sameCiphertext ? " FAIL: Should produce different ciphertexts" : " PASS: Different ciphertexts"));
 
         // Cleanup
         Arrays.fill(data, (byte) 0);
@@ -259,7 +259,7 @@ public class CryptoDemo {
 
             // Verify
             boolean matches = Arrays.equals(data, decrypted);
-            System.out.println("  Verification: " + (matches ? "✓ PASS" : "✗ FAIL"));
+            System.out.println("  Verification: " + (matches ? " PASS" : " FAIL"));
 
             // Cleanup
             Arrays.fill(data, (byte) 0);
