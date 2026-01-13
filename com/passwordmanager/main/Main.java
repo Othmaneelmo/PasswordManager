@@ -11,7 +11,6 @@ import com.passwordmanager.storage.VaultSession;
 import com.passwordmanager.storage.VaultStorage;
 import com.passwordmanager.validation.PasswordValidator;
 import com.passwordmanager.validation.ValidationResult;
-
 import java.io.Console;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -98,7 +97,7 @@ public class Main {
             }
         } finally {
             // Ensure vault is locked on exit
-            VaultSession.lock();
+            VaultSession.INSTANCE.lock();
         }
     }
 
@@ -168,7 +167,7 @@ public class Main {
 
             // Unlock vault with the same key
             byte[] sessionKey = PBKDF2Hasher.deriveSessionKey(masterKeyChars, encodedHash);
-            VaultSession.unlock(sessionKey);
+            VaultSession.INSTANCE.unlock(sessionKey);
             Arrays.fill(sessionKey, (byte) 0);
 
             console.printf("✓ Vault unlocked%n");
@@ -216,7 +215,7 @@ public class Main {
                     byte[] sessionKey = PBKDF2Hasher.deriveSessionKey(masterKeyChars, stored);
 
                     try {
-                        VaultSession.unlock(sessionKey);
+                        VaultSession.INSTANCE.unlock(sessionKey);
                         console.printf("✓ Vault unlocked%n%n");
                         return true;
                     } finally {
