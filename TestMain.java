@@ -86,17 +86,17 @@ public class TestMain {
                     byte[] sessionKey = PBKDF2Hasher.deriveSessionKey(masterKeyVerification, stored);
 
                     try {
-                        VaultSession.unlock(sessionKey);
-                        System.out.println("✓ Vault is now unlocked! State: " + VaultSession.getState());
+                        VaultSession.INSTANCE.unlock(sessionKey);
+                        System.out.println("✓ Vault is now unlocked! State: " + VaultSession.INSTANCE.getState());
 
                         // Demonstrate that we can access the session key
-                        if (VaultSession.isUnlocked()) {
+                        if (VaultSession.INSTANCE.isUnlocked()) {
                             System.out.println("✓ Session key is accessible for cryptographic operations.");
                         }
 
                         // Lock the vault when done
-                        VaultSession.lock();
-                        System.out.println("✓ Vault locked. State: " + VaultSession.getState());
+                        VaultSession.INSTANCE.lock();
+                        System.out.println("✓ Vault locked. State: " + VaultSession.INSTANCE.getState());
 
                     } finally {
                         // Always zeroize session key

@@ -182,20 +182,20 @@ public class VaultSecurityTest {
         printCategory("MEMORY SAFETY");
         
         // Ensure clean state before memory safety tests
-        VaultSession.lock();
+        VaultSession.INSTANCE.lock();
 
         test("Session key zeroization on lock", () -> {
             char[] pwd = "zeroizeTest".toCharArray();
             HashedPassword stored = PBKDF2Hasher.defaultHashPassword(pwd);
             byte[] key = PBKDF2Hasher.deriveSessionKey(pwd, stored);
             
-            VaultSession.unlock(key);
-            byte[] keyBeforeLock = VaultSession.getVaultSessionKey().getEncoded();
-            VaultSession.lock();
+            VaultSession.INSTANCE.unlock(key);
+            byte[] keyBeforeLock = VaultSession.INSTANCE.getVaultSessionKey().getEncoded();
+            VaultSession.INSTANCE.lock();
             
             // After lock, we can't access the key anymore
             try {
-                VaultSession.getVaultSessionKey();
+                VaultSession.INSTANCE.getVaultSessionKey();
                 fail("Should not be able to access key after lock");
             } catch (IllegalStateException e) {
                 // Expected
@@ -235,7 +235,7 @@ public class VaultSecurityTest {
         });
 
         test("Session key zeroization after unlock", () -> {
-            VaultSession.lock(); // Ensure locked state
+            VaultSession.INSTANCE.lock(); // Ensure locked state
             
             char[] pwd = "unlockZeroTest".toCharArray();
             HashedPassword stored = PBKDF2Hasher.defaultHashPassword(pwd);
@@ -244,7 +244,7 @@ public class VaultSecurityTest {
             // Make a copy of the key to verify zeroization
             byte[] keyCopy = Arrays.copyOf(key, key.length);
             
-            VaultSession.unlock(key);
+            VaultSession.INSTANCE.unlock(key);
             
             // Caller should zeroize the key array after unlock
             Arrays.fill(key, (byte) 0);
@@ -253,8 +253,8 @@ public class VaultSecurityTest {
             for (byte b : key) {
                 assertEquals(0, b, "Session key should be zeroized after use");
             }
-            
-            VaultSession.lock();
+
+            VaultSession.INSTANCE.lock();
             Arrays.fill(pwd, ' ');
             Arrays.fill(keyCopy, (byte) 0);
         });
@@ -266,41 +266,41 @@ public class VaultSecurityTest {
         printCategory("STATE MACHINE INVARIANTS");
         
         // Ensure clean state before state machine tests
-        VaultSession.lock();
+        VaultSession.INSTANCE.lock();
 
         test("Vault starts locked", () -> {
-            assertFalse(VaultSession.isUnlocked(), "Vault should start in locked state");
-            assertEquals("LOCKED", VaultSession.getState(), "State should be LOCKED");
+            assertFalse(VaultSession.INSTANCE.isUnlocked(), "Vault should start in locked state");
+            assertEquals("LOCKED", VaultSession.INSTANCE.getState(), "State should be LOCKED");
         });
 
         test("Cannot unlock twice", () -> {
-            VaultSession.lock(); // Ensure locked state
+            VaultSession.INSTANCE.lock(); // Ensure locked state
             
             char[] pwd = "doubleUnlock".toCharArray();
             HashedPassword stored = PBKDF2Hasher.defaultHashPassword(pwd);
             byte[] key = PBKDF2Hasher.deriveSessionKey(pwd, stored);
             
-            VaultSession.unlock(key);
+            VaultSession.INSTANCE.unlock(key);
             
             try {
                 byte[] key2 = PBKDF2Hasher.deriveSessionKey(pwd, stored);
-                VaultSession.unlock(key2);
+                VaultSession.INSTANCE.unlock(key2);
                 fail("Should not be able to unlock twice");
                 Arrays.fill(key2, (byte) 0);
             } catch (IllegalStateException e) {
                 // Expected
             }
-            
-            VaultSession.lock();
+
+            VaultSession.INSTANCE.lock();
             Arrays.fill(pwd, ' ');
             Arrays.fill(key, (byte) 0);
         });
 
         test("Cannot get key when locked", () -> {
-            VaultSession.lock(); // Ensure locked
+            VaultSession.INSTANCE.lock(); // Ensure locked
             
             try {
-                VaultSession.getVaultSessionKey();
+                VaultSession.INSTANCE.getVaultSessionKey();
                 fail("Should not be able to get key when locked");
             } catch (IllegalStateException e) {
                 // Expected
@@ -312,12 +312,12 @@ public class VaultSecurityTest {
             HashedPassword stored = PBKDF2Hasher.defaultHashPassword(pwd);
             byte[] key = PBKDF2Hasher.deriveSessionKey(pwd, stored);
             
-            VaultSession.unlock(key);
-            VaultSession.lock();
-            VaultSession.lock(); // Second lock should not throw
-            VaultSession.lock(); // Third lock should not throw
+            VaultSession.INSTANCE.unlock(key);
+            VaultSession.INSTANCE.lock();
+            VaultSession.INSTANCE.lock(); // Second lock should not throw
+            VaultSession.INSTANCE.lock(); // Third lock should not throw
             
-            assertFalse(VaultSession.isUnlocked(), "Vault should remain locked");
+            assertFalse(VaultSession.INSTANCE.isUnlocked(), "Vault should remain locked");
             
             Arrays.fill(pwd, ' ');
             Arrays.fill(key, (byte) 0);
@@ -329,19 +329,19 @@ public class VaultSecurityTest {
             
             // First unlock
             byte[] key1 = PBKDF2Hasher.deriveSessionKey(pwd, stored);
-            VaultSession.unlock(key1);
-            assertTrue(VaultSession.isUnlocked(), "Should be unlocked after first unlock");
+            VaultSession.INSTANCE.unlock(key1);
+            assertTrue(VaultSession.INSTANCE.isUnlocked(), "Should be unlocked after first unlock");
             
             // Lock
-            VaultSession.lock();
-            assertFalse(VaultSession.isUnlocked(), "Should be locked after lock");
+            VaultSession.INSTANCE.lock();
+            assertFalse(VaultSession.INSTANCE.isUnlocked(), "Should be locked after lock");
             
             // Second unlock
             byte[] key2 = PBKDF2Hasher.deriveSessionKey(pwd, stored);
-            VaultSession.unlock(key2);
-            assertTrue(VaultSession.isUnlocked(), "Should be unlocked after second unlock");
+            VaultSession.INSTANCE.unlock(key2);
+            assertTrue(VaultSession.INSTANCE.isUnlocked(), "Should be unlocked after second unlock");
             
-            VaultSession.lock();
+            VaultSession.INSTANCE.lock();
             Arrays.fill(pwd, ' ');
             Arrays.fill(key1, (byte) 0);
             Arrays.fill(key2, (byte) 0);
@@ -352,14 +352,14 @@ public class VaultSecurityTest {
             byte[] longKey = new byte[64];
             
             try {
-                VaultSession.unlock(shortKey);
+                VaultSession.INSTANCE.unlock(shortKey);
                 fail("Should reject 16-byte key");
             } catch (IllegalArgumentException e) {
                 // Expected
             }
             
             try {
-                VaultSession.unlock(longKey);
+                VaultSession.INSTANCE.unlock(longKey);
                 fail("Should reject 64-byte key");
             } catch (IllegalArgumentException e) {
                 // Expected
@@ -368,7 +368,7 @@ public class VaultSecurityTest {
 
         test("Null key rejected", () -> {
             try {
-                VaultSession.unlock(null);
+                VaultSession.INSTANCE.unlock(null);
                 fail("Should reject null key");
             } catch (IllegalArgumentException e) {
                 // Expected
@@ -534,7 +534,7 @@ public class VaultSecurityTest {
         });
 
         test("Session lock/unlock race condition", () -> {
-            VaultSession.lock();
+            VaultSession.INSTANCE.lock();
             
             char[] pwd = "raceTest".toCharArray();
             HashedPassword stored = PBKDF2Hasher.defaultHashPassword(pwd);
@@ -548,7 +548,7 @@ public class VaultSecurityTest {
                 executor.submit(() -> {
                     try {
                         byte[] threadKey = PBKDF2Hasher.deriveSessionKey(pwd, stored);
-                        VaultSession.unlock(threadKey);
+                        VaultSession.INSTANCE.unlock(threadKey);
                         Arrays.fill(threadKey, (byte) 0);
                     } catch (IllegalStateException e) {
                         // Expected - some will fail due to race
@@ -560,7 +560,7 @@ public class VaultSecurityTest {
                 
                 executor.submit(() -> {
                     try {
-                        VaultSession.lock();
+                        VaultSession.INSTANCE.lock();
                     } catch (Exception e) {
                         // Safe to ignore
                     }
@@ -575,7 +575,7 @@ public class VaultSecurityTest {
             }
             
             executor.shutdown();
-            VaultSession.lock();
+            VaultSession.INSTANCE.lock();
             Arrays.fill(pwd, ' ');
             Arrays.fill(key, (byte) 0);
         });
@@ -789,14 +789,14 @@ public class VaultSecurityTest {
             byte[] key = new byte[32];
             Arrays.fill(key, (byte) 0xFF);
             
-            VaultSession.unlock(key);
-            VaultSession.lock();
+            VaultSession.INSTANCE.unlock(key);
+            VaultSession.INSTANCE.lock();
             
             // Now try with truncated version
             byte[] truncated = Arrays.copyOf(key, 16);
             
             try {
-                VaultSession.unlock(truncated);
+                VaultSession.INSTANCE.unlock(truncated);
                 fail("Should reject truncated key");
             } catch (IllegalArgumentException e) {
                 // Expected
@@ -873,7 +873,7 @@ public class VaultSecurityTest {
 
     private static void cleanupVault() {
         try {
-            VaultSession.lock();
+            VaultSession.INSTANCE.lock();
             if (VaultStorage.exists()) {
                 VaultStorage.deleteVault();
             }

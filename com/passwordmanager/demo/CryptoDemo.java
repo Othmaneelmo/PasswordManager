@@ -44,14 +44,14 @@ public class CryptoDemo {
             char[] masterPassword = "DemoPassword123!@#".toCharArray();
             HashedPassword stored = PBKDF2Hasher.defaultHashPassword(masterPassword);
             byte[] sessionKey = PBKDF2Hasher.deriveSessionKey(masterPassword, stored);
-            VaultSession.unlock(sessionKey);
+            VaultSession.INSTANCE.unlock(sessionKey);
             Arrays.fill(masterPassword, ' ');
             Arrays.fill(sessionKey, (byte) 0);
             System.out.println(" Vault unlocked");
             System.out.println();
 
             // Get the session key for encryption
-            SecretKey vaultKey = VaultSession.getVaultSessionKey();
+            SecretKey vaultKey = VaultSession.INSTANCE.getVaultSessionKey();
 
             // Demo 1: Basic encryption/decryption with BALANCED profile
             demonstrateBasicEncryption(vaultKey);
@@ -66,7 +66,7 @@ public class CryptoDemo {
             demonstrateLargeData(vaultKey);
 
             // Cleanup
-            VaultSession.lock();
+            VaultSession.INSTANCE.lock();
             System.out.println();
             System.out.println("=".repeat(80));
             System.out.println(" Demo completed successfully");
