@@ -4,6 +4,109 @@ title PasswordManager Class Diagram
 
 class Main {
   +main(args: String[]): void
+  +displayBanner(console: Console): void
+  +initializeVault(console: Console): boolean
+  +createNewVault(console: Console): boolean
+  +unlockExistingVault(console: Console): boolean
+  +registerFeatures(registry: FeatureRegistry): void
+}
+
+interface Feature {
+  +getId(): String
+  +getDisplayName(): String
+  +getDescription(): String
+  +requiresUnlockedVault(): boolean
+  +isEnabled(): boolean
+  +execute(console: Console): void
+  +getCategory(): FeatureCategory
+  +getSortOrder(): int
+}
+
+enum FeatureCategory {
+  ENCRYPTION
+  FILE_MANAGEMENT
+  PASSWORD_MANAGEMENT
+  SETTINGS
+  SYSTEM
+  OTHER
+}
+
+class AbstractFeature {
+  #vaultSession: VaultSession
+  +AbstractFeature(vaultSession: VaultSession)
+  +{abstract} getId(): String
+  +{abstract} getDisplayName(): String
+  +{abstract} getDescription(): String
+  +{abstract} execute(console: Console): void
+}
+
+class FeatureRegistry {
+  -features: Map<String, Feature>
+  +register(feature: Feature): void
+  +unregister(featureId: String): void
+  +getFeatureById(featureId: String): Feature
+  +getAllFeatures(): List<Feature>
+  +getEnabledFeatures(): List<Feature>
+  +getEnabledFeaturesInCategory(category: FeatureCategory): List<Feature>
+  +getFeaturesByCategory(): Map<FeatureCategory, List<Feature>>
+  +getFeatureCount(): int
+  +getEnabledFeatureCount(): int
+  +hasFeature(featureId: String): boolean
+  +clear(): void
+}
+
+class FeatureMenu {
+  -registry: FeatureRegistry
+  -vaultSession: VaultSession
+  -console: Console
+  +FeatureMenu(registry: FeatureRegistry, vaultSession: VaultSession, console: Console)
+  +run(): void
+  +displayMenu(): void
+  +executeFeature(feature: Feature): void
+}
+
+class EncryptDataFeature {
+  +EncryptDataFeature(vaultSession: VaultSession)
+  +getId(): String
+  +getDisplayName(): String
+  +getDescription(): String
+  +requiresUnlockedVault(): boolean
+  +isEnabled(): boolean
+  +execute(console: Console): void
+  +getCategory(): FeatureCategory
+}
+
+class DecryptDataFeature {
+  +DecryptDataFeature(vaultSession: VaultSession)
+  +getId(): String
+  +getDisplayName(): String
+  +getDescription(): String
+  +requiresUnlockedVault(): boolean
+  +isEnabled(): boolean
+  +execute(console: Console): void
+  +getCategory(): FeatureCategory
+}
+
+class LockVaultFeature {
+  +LockVaultFeature(vaultSession: VaultSession)
+  +getId(): String
+  +getDisplayName(): String
+  +getDescription(): String
+  +requiresUnlockedVault(): boolean
+  +isEnabled(): boolean
+  +execute(console: Console): void
+  +getCategory(): FeatureCategory
+}
+
+class ExitFeature {
+  +ExitFeature(vaultSession: VaultSession)
+  +getId(): String
+  +getDisplayName(): String
+  +getDescription(): String
+  +requiresUnlockedVault(): boolean
+  +isEnabled(): boolean
+  +execute(console: Console): void
+  +getCategory(): FeatureCategory
 }
 
 class HashedPassword {
@@ -60,14 +163,72 @@ class ValidationResult {
   +messages(): List<String>
 }
 
+interface EncryptionProvider {
+  +encrypt(data: byte[], key: SecretKey): EncryptionResult
+  +decrypt(data: byte[], key: SecretKey): byte[]
+}
+
+class AesGcmProvider {
+  +encrypt(data: byte[], key: SecretKey): EncryptionResult
+  +decrypt(data: byte[], key: SecretKey): byte[]
+}
+
+class EncryptionResult {
+  -encryptedData: byte[]
+  -iv: byte[]
+  +EncryptionResult(encryptedData: byte[], iv: byte[])
+  +getEncryptedData(): byte[]
+  +getIv(): byte[]
+}
+
+class SecurityProfile {
+  -encryptionProvider: EncryptionProvider
+  +SecurityProfile(encryptionProvider: EncryptionProvider)
+  +getEncryptionProvider(): EncryptionProvider
+}
+
+class CryptoDemo {
+  +main(args: String[]): void
+}
+
+class VaultSecurityTest {
+  +testVaultSecurity(): void
+}
+
+Main --> FeatureRegistry : creates
+Main --> FeatureMenu : creates
 Main --> HashedPassword : uses
 Main --> PBKDF2Hasher : uses
 Main --> VaultStorage : uses
 Main --> VaultSession : uses
 Main --> PasswordValidator : uses
 Main --> ValidationResult : uses
+
+FeatureRegistry --> Feature : manages
+Feature --> FeatureCategory : uses
+Feature --> VaultSession : uses
+
+AbstractFeature --> Feature : implements
+AbstractFeature --> VaultSession : uses
+
+EncryptDataFeature --> AbstractFeature : extends
+DecryptDataFeature --> AbstractFeature : extends
+LockVaultFeature --> AbstractFeature : extends
+ExitFeature --> AbstractFeature : extends
+
+FeatureMenu --> FeatureRegistry : uses
+FeatureMenu --> Feature : executes
+FeatureMenu --> VaultSession : uses
+
 PBKDF2Hasher --> HashedPassword : creates
 VaultStorage --> HashedPassword : uses
 PasswordValidator --> ValidationResult : returns
+
+EncryptionProvider --> EncryptionResult : returns
+AesGcmProvider --> EncryptionProvider : implements
+SecurityProfile --> EncryptionProvider : uses
+
+EncryptDataFeature --> EncryptionProvider : uses
+DecryptDataFeature --> EncryptionProvider : uses
 
 @enduml
