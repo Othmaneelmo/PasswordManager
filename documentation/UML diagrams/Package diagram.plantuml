@@ -21,11 +21,56 @@ package "com.passwordmanager" as com.passwordmanager {
     class PasswordValidator
     class ValidationResult
   }
+
+  package "crypto" as crypto {
+    interface EncryptionProvider
+    class AesGcmProvider
+    class EncryptionResult
+    class SecurityProfile
+  }
+
+  package "demo" as demo {
+    class CryptoDemo
+  }
+
+  package "features" as features {
+    interface Feature
+    enum FeatureCategory
+    class AbstractFeature
+    class FeatureRegistry
+    class FeatureMenu
+    package "encryption" as encryption {
+      class EncryptDataFeature
+      class DecryptDataFeature
+    }
+    package "system" as system {
+      class LockVaultFeature
+      class ExitFeature
+    }
+  }
+
+  package "test" as test {
+    class VaultSecurityTest
+  }
 }
 
+main --> features : creates and uses
 main --> security : uses
 main --> storage : uses
 main --> validation : uses
+
+features --> storage : uses
+features --> crypto : uses
+
+crypto --> security : uses
+
+demo --> crypto : uses
+demo --> security : uses
+
+test --> security : uses
+test --> storage : uses
+test --> validation : uses
+
 security --> storage : interacts
 validation --> main : returns
 
