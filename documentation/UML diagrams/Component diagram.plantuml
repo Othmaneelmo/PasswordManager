@@ -4,50 +4,91 @@ title PasswordManager Component Diagram
 
 component "User Interface" as UI {
   component "Console" as Console
-}
-
-component "Main" as Main {
+  component "FeatureMenu" as Menu
   note right
-    Entry point for the application.
-    Handles master key creation, validation,
-    hashing, storage, and vault unlocking.
+    Provides console-based user interface
+    and menu-driven feature selection.
   end note
 }
 
-component "Security" as Security {
+component "Application Core" as Core {
+  component "Main" as Main
+  component "FeatureRegistry" as Registry
+  note right
+    Application entry point and feature
+    management system for extensible
+    functionality.
+  end note
+}
+
+component "Security Layer" as Security {
   component "PBKDF2Hasher" as Hasher
   component "HashedPassword" as HashedPwd
+  component "PasswordValidator" as Validator
+  component "ValidationResult" as Result
   note right
     Handles password hashing, verification,
-    and key derivation using PBKDF2.
+    key derivation, and password validation.
   end note
 }
 
-component "Storage" as Storage {
+component "Storage Layer" as Storage {
   component "VaultStorage" as VaultStorage
   component "VaultSession" as VaultSession
   component "Vault Folder" as VaultFolder
   note right
     Manages persistent storage of master key
-    and session unlocking.
+    and session state management.
   end note
 }
 
-component "Validation" as Validation {
-  component "PasswordValidator" as Validator
-  component "ValidationResult" as Result
+component "Crypto Layer" as Crypto {
+  interface "EncryptionProvider" as Provider
+  component "AesGcmProvider" as AesGcm
+  component "EncryptionResult" as EncResult
+  component "SecurityProfile" as Profile
   note right
-    Validates password strength and provides
-    feedback on requirements.
+    Provides encryption/decryption services
+    with configurable security profiles.
   end note
 }
 
-UI --> Main : interacts with
-Main --> Security : uses for hashing
-Main --> Storage : uses for persistence
-Main --> Validation : uses for validation
-Security --> HashedPwd : creates
-Storage --> VaultFolder : stores in
-Validation --> Result : returns
+component "Feature System" as Features {
+  interface "Feature" as Feature
+  component "AbstractFeature" as Abstract
+  component "EncryptDataFeature" as Encrypt
+  component "DecryptDataFeature" as Decrypt
+  component "LockVaultFeature" as Lock
+  component "ExitFeature" as Exit
+  note right
+    Extensible feature system for
+    encryption operations and system
+    management.
+  end note
+}
+
+component "Demo & Test" as DemoTest {
+  component "CryptoDemo" as Demo
+  component "VaultSecurityTest" as Test
+  note right
+    Demonstration and testing components
+    for crypto and security functionality.
+  end note
+}
+
+UI --> Core : user input
+Core --> Security : authentication
+Core --> Storage : persistence
+Core --> Features : feature execution
+
+Features --> Crypto : encryption services
+Features --> Storage : session access
+
+Security --> Storage : key storage
+Crypto --> Security : key derivation
+
+DemoTest --> Crypto : demo encryption
+DemoTest --> Security : test security
+DemoTest --> Storage : test storage
 
 @enduml
