@@ -1,51 +1,87 @@
 @startuml Sequence Diagram
 
-title PasswordManager Sequence Diagram - Master Key Setup and Unlock
+title PasswordManager Sequence Diagram - Application Startup and Feature Execution
 
 actor User
 participant Main
+participant FeatureRegistry
+participant FeatureMenu
+participant Feature
+participant VaultSession
+participant VaultStorage
+participant PBKDF2Hasher
 participant PasswordValidator
 participant ValidationResult
-participant PBKDF2Hasher
-participant HashedPassword
-participant VaultStorage
-participant VaultSession
+participant EncryptionProvider
 
-User -> Main: Enter master key
-Main -> PasswordValidator: validate(masterKeyChars)
-PasswordValidator -> ValidationResult: new ValidationResult(ok, messages)
-ValidationResult --> PasswordValidator: return ValidationResult
-PasswordValidator --> Main: return ValidationResult
+== Application Startup ==
+User -> Main: Start application
+Main -> Main: displayBanner(console)
+Main -> Main: initializeVault(console)
 
-alt password valid
-    Main -> PBKDF2Hasher: defaultHashPassword(masterKeyChars)
-    PBKDF2Hasher -> HashedPassword: new HashedPassword(...)
-    HashedPassword --> PBKDF2Hasher: return HashedPassword
-    PBKDF2Hasher --> Main: return HashedPassword
-
-    Main -> VaultStorage: saveMasterKey(algorithm, iterations, salt, hash)
-    VaultStorage --> Main: save completed
-
-    User -> Main: Re-enter master key for verification
+alt Vault exists
+    Main -> VaultStorage: exists()
+    VaultStorage --> Main: true
+    Main -> Main: unlockExistingVault(console)
     Main -> VaultStorage: loadHashedPassword()
-    VaultStorage -> HashedPassword: load from JSON
-    HashedPassword --> VaultStorage: return HashedPassword
-    VaultStorage --> Main: return HashedPassword
-
-    Main -> PBKDF2Hasher: verifyPassword(masterKeyVerification, stored)
-    PBKDF2Hasher --> Main: return true/false
-
-    alt verification successful
-        Main -> PBKDF2Hasher: deriveSessionKey(masterKeyVerification, stored)
-        PBKDF2Hasher --> Main: return sessionKey
-        Main -> VaultSession: unlock(sessionKey)
-        VaultSession --> Main: vault unlocked
-        Main --> User: Vault is now unlocked!
-    else verification failed
-        Main --> User: Wrong master key
-    end
-else password invalid
-    Main --> User: Password not strong enough
+    VaultStorage --> Main: HashedPassword
+    Main -> PBKDF2Hasher: verifyPassword(password, stored)
+    PBKDF2Hasher --> Main: true
+    Main -> PBKDF2Hasher: deriveSessionKey(password, stored)
+    PBKDF2Hasher --> Main: sessionKey
+    Main -> VaultSession: unlock(sessionKey)
+else Vault does not exist
+    Main -> Main: createNewVault(console)
+    Main -> PasswordValidator: validate(password)
+    PasswordValidator -> ValidationResult: new ValidationResult(ok, messages)
+    ValidationResult --> PasswordValidator: ValidationResult
+    PasswordValidator --> Main: ValidationResult
+    Main -> PBKDF2Hasher: defaultHashPassword(password)
+    PBKDF2Hasher --> Main: HashedPassword
+    Main -> VaultStorage: saveMasterKey(...)
+    Main -> PBKDF2Hasher: deriveSessionKey(password, hashed)
+    PBKDF2Hasher --> Main: sessionKey
+    Main -> VaultSession: unlock(sessionKey)
 end
+
+== Feature Registration and Menu ==
+Main -> FeatureRegistry: new FeatureRegistry()
+Main -> Main: registerFeatures(registry)
+Main -> FeatureRegistry: register(EncryptDataFeature)
+Main -> FeatureRegistry: register(DecryptDataFeature)
+Main -> FeatureRegistry: register(LockVaultFeature)
+Main -> FeatureRegistry: register(ExitFeature)
+
+Main -> FeatureMenu: new FeatureMenu(registry, vaultSession, console)
+Main -> FeatureMenu: run()
+
+== Menu Loop ==
+loop User selects features
+    FeatureMenu -> FeatureMenu: displayMenu()
+    FeatureMenu -> FeatureRegistry: getEnabledFeatures()
+    FeatureRegistry --> FeatureMenu: List<Feature>
+    FeatureMenu --> User: Display menu options
+
+    User -> FeatureMenu: Select feature (e.g., "encrypt-data")
+    FeatureMenu -> FeatureRegistry: getFeatureById("encrypt-data")
+    FeatureRegistry --> FeatureMenu: EncryptDataFeature
+
+    alt Feature requires unlocked vault
+        FeatureMenu -> VaultSession: isUnlocked()
+        VaultSession --> FeatureMenu: true
+        FeatureMenu -> Feature: execute(console)
+        Feature -> EncryptionProvider: encrypt(data, key)
+        EncryptionProvider --> Feature: EncryptionResult
+        Feature --> User: Encrypted data
+    else Feature does not require vault
+        FeatureMenu -> Feature: execute(console)
+        Feature --> User: Result
+    end
+end
+
+User -> FeatureMenu: Select "exit"
+FeatureMenu -> Feature: execute(console) [ExitFeature]
+Feature -> VaultSession: lock()
+FeatureMenu --> Main: exit
 
 @enduml
