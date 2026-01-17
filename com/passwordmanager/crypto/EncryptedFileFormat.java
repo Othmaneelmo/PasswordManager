@@ -1,11 +1,6 @@
 package com.passwordmanager.crypto;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
@@ -39,8 +34,7 @@ import java.util.Arrays;
  *   <li>Can add file integrity manifests</li>
  * </ul>
  */
-public class EncryptedFileFormat {
-
+public final class EncryptedFileFormat {
     // Magic header to identify encrypted files
     private static final byte[] MAGIC_HEADER = "VAULTENC".getBytes(StandardCharsets.US_ASCII);
     
@@ -59,7 +53,7 @@ public class EncryptedFileFormat {
     
     /**
      * Metadata extracted from encrypted file header.
-    */
+     */
     public static final class FileMetadata {
         private final byte version;
         private final SecurityProfile profile;
@@ -107,9 +101,12 @@ public class EncryptedFileFormat {
             throw new IllegalArgumentException("IV cannot be null or empty");
         }
         if (iv.length > MAX_IV_LENGTH) {
-            throw new IllegalArgumentException("IV length exceeds maximum: " + iv.length + " > " + MAX_IV_LENGTH);
+            throw new IllegalArgumentException(
+                "IV length exceeds maximum: " + iv.length + " > " + MAX_IV_LENGTH
+            );
         }
-       // Write magic header
+        
+        // Write magic header
         out.write(MAGIC_HEADER);
         
         // Write version
@@ -126,8 +123,7 @@ public class EncryptedFileFormat {
         // Write IV
         out.write(iv);
     }
-
-
+    
     /**
      * Reads and validates encrypted file header.
      * <p>
@@ -198,33 +194,6 @@ public class EncryptedFileFormat {
         return new FileMetadata(version, profile, iv);
     }
     
-
-    /**
-     * Converts SecurityProfile to byte representation.
-     */
-    private static byte profileToByte(SecurityProfile profile) {
-        switch (profile) {
-            case FAST: return 0x00;
-            case BALANCED: return 0x01;
-            case PARANOID: return 0x02;
-            default:
-                throw new IllegalArgumentException("Unknown profile: " + profile);
-        }
-    }
-    /**
-     * Converts byte to SecurityProfile.
-     */
-    private static SecurityProfile byteToProfile(byte b) throws IOException {
-        switch (b) {
-            case 0x00: return SecurityProfile.FAST;
-            case 0x01: return SecurityProfile.BALANCED;
-            case 0x02: return SecurityProfile.PARANOID;
-            default:
-                throw new IOException("Unknown security profile byte: 0x" + 
-                    String.format("%02X", b));
-        }
-    }
-
     /**
      * Reads exactly n bytes from input stream.
      * <p>
@@ -254,7 +223,34 @@ public class EncryptedFileFormat {
         
         return buf;
     }
-
+    
+    /**
+     * Converts SecurityProfile to byte representation.
+     */
+    private static byte profileToByte(SecurityProfile profile) {
+        switch (profile) {
+            case FAST: return 0x00;
+            case BALANCED: return 0x01;
+            case PARANOID: return 0x02;
+            default:
+                throw new IllegalArgumentException("Unknown profile: " + profile);
+        }
+    }
+    
+    /**
+     * Converts byte to SecurityProfile.
+     */
+    private static SecurityProfile byteToProfile(byte b) throws IOException {
+        switch (b) {
+            case 0x00: return SecurityProfile.FAST;
+            case 0x01: return SecurityProfile.BALANCED;
+            case 0x02: return SecurityProfile.PARANOID;
+            default:
+                throw new IOException("Unknown security profile byte: 0x" + 
+                    String.format("%02X", b));
+        }
+    }
+    
     /**
      * Returns the expected header size for a given IV length.
      * <p>
@@ -267,7 +263,7 @@ public class EncryptedFileFormat {
     public static int getHeaderSize(int ivLength) {
         return HEADER_SIZE + ivLength;
     }
-
+    
     /**
      * Validates that a file appears to be encrypted (has correct magic).
      * <p>
@@ -289,4 +285,5 @@ public class EncryptedFileFormat {
         } catch (IOException e) {
             return false;
         }
+    }
 }
