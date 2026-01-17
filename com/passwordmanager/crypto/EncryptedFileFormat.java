@@ -1,5 +1,8 @@
 package com.passwordmanager.crypto;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -264,4 +267,26 @@ public class EncryptedFileFormat {
     public static int getHeaderSize(int ivLength) {
         return HEADER_SIZE + ivLength;
     }
+
+    /**
+     * Validates that a file appears to be encrypted (has correct magic).
+     * <p>
+     * This is a lightweight check that doesn't parse the full header.
+     * </p>
+     *
+     * @param file file to check
+     * @return true if file starts with magic header
+     */
+    public static boolean isEncryptedFile(File file) {
+        if (!file.exists() || !file.canRead()) {
+            return false;
+        }
+        
+        try (InputStream in = new BufferedInputStream(new FileInputStream(file))) {
+            byte[] magic = new byte[MAGIC_HEADER.length];
+            int read = in.read(magic);
+            return read == MAGIC_HEADER.length && Arrays.equals(magic, MAGIC_HEADER);
+        } catch (IOException e) {
+            return false;
+        }
 }
