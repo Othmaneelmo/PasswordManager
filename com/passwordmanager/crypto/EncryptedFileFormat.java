@@ -1,4 +1,7 @@
 package com.passwordmanager.crypto;
+
+import java.nio.charset.StandardCharsets;
+
 /**
  * Defines the encrypted file format specification.
  * <p>
@@ -31,6 +34,20 @@ package com.passwordmanager.crypto;
  */
 public class EncryptedFileFormat {
 
+    // Magic header to identify encrypted files
+    private static final byte[] MAGIC_HEADER = "VAULTENC".getBytes(StandardCharsets.US_ASCII);
     
+    // Current format version
+    private static final byte FORMAT_VERSION = 0x01;
+    
+    // Header size: magic(8) + version(1) + profile(1) + ivLen(2) = 12 bytes
+    private static final int HEADER_SIZE = 12;
+    
+    // Maximum IV size (supports up to 64KB IVs for future algorithms)
+    private static final int MAX_IV_LENGTH = 65535;
+    
+    private EncryptedFileFormat() {
+        throw new AssertionError("Utility class");
+    }
     
 }
