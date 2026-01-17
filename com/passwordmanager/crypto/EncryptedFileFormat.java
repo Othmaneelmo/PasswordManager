@@ -251,4 +251,17 @@ public class EncryptedFileFormat {
         
         return buf;
     }
+
+    /**
+     * Returns the expected header size for a given IV length.
+     * <p>
+     * Useful for validation and pre-allocation.
+     * </p>
+     *
+     * @param ivLength length of IV in bytes
+     * @return total header size in bytes
+     */
+    public static int getHeaderSize(int ivLength) {
+        return HEADER_SIZE + ivLength;
+    }
 }
