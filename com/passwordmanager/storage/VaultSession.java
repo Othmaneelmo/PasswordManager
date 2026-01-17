@@ -36,6 +36,13 @@ import javax.crypto.spec.SecretKeySpec;
  *   <li>State transitions are atomic and fail-safe</li>
  * </ul>
  * 
+ * <p><b>Thread Safety:</b></p>
+ * <p>
+ * This class is <b>NOT thread-safe</b>. It is designed for single-threaded
+ * console applications where only one thread accesses the vault at a time.
+ * Do not access this class from multiple threads concurrently without external synchronization.
+ * </p>
+ * 
  * <p><b>Usage:</b></p>
  * <pre>
  * VaultSession session = VaultSession.INSTANCE;
@@ -54,9 +61,9 @@ public final class VaultSession {
      */
     public static final VaultSession INSTANCE = new VaultSession();
 
-    // Instance fields (not static!)
-    private volatile boolean unlocked = false;
-    private volatile SecretKey vaultSessionKey = null;
+    // Instance fields (not synchronized - single-threaded design)
+    private boolean unlocked = false;
+    private SecretKey vaultSessionKey = null;
 
     // Private constructor prevents external instantiation
     private VaultSession() {
@@ -83,7 +90,7 @@ public final class VaultSession {
      * @throws IllegalStateException if the vault is already unlocked
      * @throws IllegalArgumentException if keyBytes is null or not 32 bytes
      */
-    public synchronized void unlock(byte[] keyBytes) {
+    public void unlock(byte[] keyBytes) {
         if (unlocked) {
             throw new IllegalStateException("Vault is already unlocked");
         }
@@ -112,7 +119,7 @@ public final class VaultSession {
      * the reference is cleared.
      * </p>
      */
-    public synchronized void lock() {
+    public void lock() {
         if (vaultSessionKey != null) {
             // Attempt to zeroize raw key bytes if accessible
             byte[] keyBytes = vaultSessionKey.getEncoded();
@@ -127,12 +134,12 @@ public final class VaultSession {
     /**
      * Returns whether the vault is currently unlocked.
      * <p>
-     * This method is thread-safe and can be called at any time.
+     * This method can be called at any time to check the vault state.
      * </p>
      *
      * @return {@code true} if the vault is unlocked, {@code false} otherwise
      */
-    public synchronized boolean isUnlocked() {
+    public boolean isUnlocked() {
         return unlocked;
     }
 
@@ -150,7 +157,7 @@ public final class VaultSession {
      * @return the AES {@link SecretKey} for the current session
      * @throws IllegalStateException if the vault is locked
      */
-    public synchronized SecretKey getVaultSessionKey() {
+    public SecretKey getVaultSessionKey() {
         if (!unlocked || vaultSessionKey == null) {
             throw new IllegalStateException("Vault is locked. Call unlock() first.");
         }
@@ -165,7 +172,7 @@ public final class VaultSession {
      *
      * @return "LOCKED" or "UNLOCKED"
      */
-    public synchronized String getState() {
+    public String getState() {
         return unlocked ? "UNLOCKED" : "LOCKED";
     }
 }
