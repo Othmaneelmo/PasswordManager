@@ -81,5 +81,18 @@ public class EncryptedFileFormat {
             Arrays.fill(iv, (byte) 0);
         }
     }
+
+    /**
+     * Converts SecurityProfile to byte representation.
+     */
+    private static byte profileToByte(SecurityProfile profile) {
+        switch (profile) {
+            case FAST: return 0x00;
+            case BALANCED: return 0x01;
+            case PARANOID: return 0x02;
+            default:
+                throw new IllegalArgumentException("Unknown profile: " + profile);
+        }
+    }
     
 }
