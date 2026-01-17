@@ -125,7 +125,76 @@ public class EncryptedFileFormat {
     }
 
 
-
+    /**
+     * Reads and validates encrypted file header.
+     * <p>
+     * Performs strict validation:
+     * - Magic header must match exactly
+     * - Version must be supported
+     * - Profile must be valid
+     * - IV length must be reasonable
+     * </p>
+     *
+     * @param in input stream positioned at start of file
+     * @return metadata extracted from header
+     * @throws IOException if read fails or format is invalid
+     */
+    public static FileMetadata readHeader(InputStream in) throws IOException {
+        // Read and validate magic header
+        byte[] magic = readExactly(in, MAGIC_HEADER.length);
+        if (!Arrays.equals(magic, MAGIC_HEADER)) {
+            throw new IOException(
+                "Invalid file format - not an encrypted vault file (bad magic header)"
+            );
+        }
+        
+        // Read version
+        int versionInt = in.read();
+        if (versionInt == -1) {
+            throw new IOException("Unexpected end of file reading version");
+        }
+        byte version = (byte) versionInt;
+        
+        if (version != FORMAT_VERSION) {
+            throw new IOException(
+                "Unsupported file format version: " + version + 
+                " (expected: " + FORMAT_VERSION + ")"
+            );
+        }
+        
+        // Read profile
+        int profileByte = in.read();
+        if (profileByte == -1) {
+            throw new IOException("Unexpected end of file reading profile");
+        }
+        SecurityProfile profile = byteToProfile((byte) profileByte);
+        
+        // Read IV length (big-endian uint16)
+        int ivLenHigh = in.read();
+        int ivLenLow = in.read();
+        if (ivLenHigh == -1 || ivLenLow == -1) {
+            throw new IOException("Unexpected end of file reading IV length");
+        }
+        int ivLen = ((ivLenHigh & 0xFF) << 8) | (ivLenLow & 0xFF);
+        
+        if (ivLen <= 0 || ivLen > MAX_IV_LENGTH) {
+            throw new IOException("Invalid IV length: " + ivLen);
+        }
+        
+        // Validate IV length matches profile expectations
+        if (ivLen != profile.getIvBytes()) {
+            throw new IOException(
+                "IV length mismatch - file has " + ivLen + " bytes, " +
+                "but profile " + profile + " expects " + profile.getIvBytes()
+            );
+        }
+        
+        // Read IV
+        byte[] iv = readExactly(in, ivLen);
+        
+        return new FileMetadata(version, profile, iv);
+    }
+    
 
     /**
      * Converts SecurityProfile to byte representation.
