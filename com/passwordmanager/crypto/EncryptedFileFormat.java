@@ -1,6 +1,7 @@
 package com.passwordmanager.crypto;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 /**
  * Defines the encrypted file format specification.
@@ -48,6 +49,37 @@ public class EncryptedFileFormat {
     
     private EncryptedFileFormat() {
         throw new AssertionError("Utility class");
+    }
+    
+    /**
+     * Metadata extracted from encrypted file header.
+    */
+    public static final class FileMetadata {
+        private final byte version;
+        private final SecurityProfile profile;
+        private final byte[] iv;
+        
+        public FileMetadata(byte version, SecurityProfile profile, byte[] iv) {
+            this.version = version;
+            this.profile = profile;
+            this.iv = iv;
+        }
+        
+        public byte getVersion() {
+            return version;
+        }
+        
+        public SecurityProfile getProfile() {
+            return profile;
+        }
+        
+        public byte[] getIv() {
+            return iv;
+        }
+        
+        public void zeroize() {
+            Arrays.fill(iv, (byte) 0);
+        }
     }
     
 }
