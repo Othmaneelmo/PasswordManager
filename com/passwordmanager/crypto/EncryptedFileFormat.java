@@ -1,6 +1,7 @@
 package com.passwordmanager.crypto;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -125,6 +126,7 @@ public class EncryptedFileFormat {
 
 
 
+
     /**
      * Converts SecurityProfile to byte representation.
      */
@@ -149,5 +151,35 @@ public class EncryptedFileFormat {
                 throw new IOException("Unknown security profile byte: 0x" + 
                     String.format("%02X", b));
         }
+    }
+
+    /**
+     * Reads exactly n bytes from input stream.
+     * <p>
+     * Unlike InputStream.read(), this method guarantees to read the full
+     * amount or throw an exception.
+     * </p>
+     *
+     * @param in input stream
+     * @param n number of bytes to read
+     * @return byte array of exactly n bytes
+     * @throws IOException if fewer than n bytes available
+     */
+    private static byte[] readExactly(InputStream in, int n) throws IOException {
+        byte[] buf = new byte[n];
+        int offset = 0;
+        
+        while (offset < n) {
+            int read = in.read(buf, offset, n - offset);
+            if (read == -1) {
+                throw new IOException(
+                    "Unexpected end of file - expected " + n + 
+                    " bytes, got " + offset
+                );
+            }
+            offset += read;
+        }
+        
+        return buf;
     }
 }
