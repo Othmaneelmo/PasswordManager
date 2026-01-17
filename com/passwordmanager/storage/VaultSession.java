@@ -25,8 +25,7 @@ import javax.crypto.spec.SecretKeySpec;
  *   <li>All key material is zeroized on {@code lock()}</li>
  * </ul>
  * <p>
- * This class provides both static methods (for backward compatibility) and
- * a singleton instance (for dependency injection).
+ * This class is implemented as a singleton. Use {@code VaultSession.INSTANCE} to access it.
  * </p>
  * 
  * <p><b>Security Guarantees:</b></p>
@@ -39,13 +38,10 @@ import javax.crypto.spec.SecretKeySpec;
  * 
  * <p><b>Usage:</b></p>
  * <pre>
- * // Static usage (backward compatible)
- * VaultSession.unlock(keyBytes);
- * VaultSession.lock();
- * 
- * // Instance usage (for dependency injection)
  * VaultSession session = VaultSession.INSTANCE;
  * session.unlock(keyBytes);
+ * SecretKey key = session.getVaultSessionKey();
+ * // ... use key ...
  * session.lock();
  * </pre>
  */
@@ -53,14 +49,14 @@ public final class VaultSession {
     /**
      * Singleton instance for dependency injection.
      * <p>
-     * Use this constant to pass VaultSession to features and other components
-     * that should not use static methods.
+     * Use this constant to access VaultSession throughout the application.
      * </p>
      */
     public static final VaultSession INSTANCE = new VaultSession();
 
-    private static volatile boolean unlocked = false;
-    private static volatile SecretKey vaultSessionKey = null;
+    // Instance fields (not static!)
+    private volatile boolean unlocked = false;
+    private volatile SecretKey vaultSessionKey = null;
 
     // Private constructor prevents external instantiation
     private VaultSession() {
@@ -136,7 +132,7 @@ public final class VaultSession {
      *
      * @return {@code true} if the vault is unlocked, {@code false} otherwise
      */
-    public boolean isUnlocked() {
+    public synchronized boolean isUnlocked() {
         return unlocked;
     }
 
@@ -169,7 +165,7 @@ public final class VaultSession {
      *
      * @return "LOCKED" or "UNLOCKED"
      */
-    public String getState() {
+    public synchronized String getState() {
         return unlocked ? "UNLOCKED" : "LOCKED";
     }
 }
