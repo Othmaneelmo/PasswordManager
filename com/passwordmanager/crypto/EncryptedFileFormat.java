@@ -103,10 +103,25 @@ public class EncryptedFileFormat {
             throw new IllegalArgumentException("IV cannot be null or empty");
         }
         if (iv.length > MAX_IV_LENGTH) {
-            throw new IllegalArgumentException(
-                "IV length exceeds maximum: " + iv.length + " > " + MAX_IV_LENGTH
-            );
+            throw new IllegalArgumentException("IV length exceeds maximum: " + iv.length + " > " + MAX_IV_LENGTH);
         }
+       // Write magic header
+        out.write(MAGIC_HEADER);
+        
+        // Write version
+        out.write(FORMAT_VERSION);
+        
+        // Write profile byte
+        out.write(profileToByte(profile));
+        
+        // Write IV length (big-endian uint16)
+        int ivLen = iv.length;
+        out.write((ivLen >> 8) & 0xFF);
+        out.write(ivLen & 0xFF);
+        
+        // Write IV
+        out.write(iv);
+    }
 
     /**
      * Converts SecurityProfile to byte representation.
