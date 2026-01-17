@@ -1,5 +1,7 @@
 package com.passwordmanager.crypto;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
@@ -81,6 +83,30 @@ public class EncryptedFileFormat {
             Arrays.fill(iv, (byte) 0);
         }
     }
+    
+    /**
+     * Writes encrypted file header to output stream.
+     * <p>
+     * Format: [MAGIC][VERSION][PROFILE][IV_LEN][IV]
+     * </p>
+     *
+     * @param out output stream
+     * @param profile security profile used
+     * @param iv initialization vector
+     * @throws IOException if write fails
+     * @throws IllegalArgumentException if IV is too large
+     */
+    public static void writeHeader(OutputStream out, SecurityProfile profile, byte[] iv) 
+            throws IOException {
+        
+        if (iv == null || iv.length == 0) {
+            throw new IllegalArgumentException("IV cannot be null or empty");
+        }
+        if (iv.length > MAX_IV_LENGTH) {
+            throw new IllegalArgumentException(
+                "IV length exceeds maximum: " + iv.length + " > " + MAX_IV_LENGTH
+            );
+        }
 
     /**
      * Converts SecurityProfile to byte representation.
