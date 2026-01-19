@@ -4,13 +4,12 @@ import com.passwordmanager.crypto.*;
 import com.passwordmanager.security.HashedPassword;
 import com.passwordmanager.security.PBKDF2Hasher;
 import com.passwordmanager.storage.VaultSession;
-
-import javax.crypto.SecretKey;
 import java.io.File;
 import java.io.FileWriter;
 import java.nio.file.Files;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
+import javax.crypto.SecretKey;
 
 /**
  * Comprehensive demonstration of file encryption system.
@@ -45,7 +44,7 @@ public class FileEncryptionDemo {
             demoBinaryFiles();
             
             // Cleanup
-            VaultSession.lock();
+            VaultSession.INSTANCE.lock();
             cleanupTestFiles();
             
             System.out.println();
@@ -76,7 +75,7 @@ public class FileEncryptionDemo {
         File encryptedFile = new File("test_encrypted.vault");
         File decryptedFile = new File("test_decrypted.txt");
         
-        SecretKey sessionKey = VaultSession.getVaultSessionKey();
+        SecretKey sessionKey = VaultSession.INSTANCE.getVaultSessionKey();
         
         // Encrypt
         System.out.println("Encrypting: " + plainFile.getName());
@@ -137,7 +136,7 @@ public class FileEncryptionDemo {
         File plainFile = new File("profile_test.dat");
         Files.write(plainFile.toPath(), testData);
         
-        SecretKey sessionKey = VaultSession.getVaultSessionKey();
+        SecretKey sessionKey = VaultSession.INSTANCE.getVaultSessionKey();
         
         System.out.printf("%-12s %-15s %-15s %-15s %-10s%n",
             "Profile", "Enc Time (ms)", "Dec Time (ms)", "File Size", "Overhead");
@@ -193,7 +192,7 @@ public class FileEncryptionDemo {
         
         File encFile = new File("tamper_test.vault");
         
-        SecretKey sessionKey = VaultSession.getVaultSessionKey();
+        SecretKey sessionKey = VaultSession.INSTANCE.getVaultSessionKey();
         FileEncryptor encryptor = new FileEncryptor(SecurityProfile.BALANCED);
         encryptor.encryptFile(plainFile, encFile, sessionKey);
         
@@ -256,7 +255,7 @@ public class FileEncryptionDemo {
         File encFile = new File("key_test.vault");
         
         // Use current session key
-        SecretKey correctKey = VaultSession.getVaultSessionKey();
+        SecretKey correctKey = VaultSession.INSTANCE.getVaultSessionKey();
         FileEncryptor encryptor = new FileEncryptor(SecurityProfile.BALANCED);
         encryptor.encryptFile(plainFile, encFile, correctKey);
         
@@ -309,7 +308,7 @@ public class FileEncryptionDemo {
     private static void demoLargeFiles() throws Exception {
         printSection("LARGE FILE PERFORMANCE");
         
-        SecretKey sessionKey = VaultSession.getVaultSessionKey();
+        SecretKey sessionKey = VaultSession.INSTANCE.getVaultSessionKey();
         
         int[] sizes = {1024 * 1024, 10 * 1024 * 1024}; // 1MB, 10MB
         String[] labels = {"1 MB", "10 MB"};
@@ -379,7 +378,7 @@ public class FileEncryptionDemo {
         File encFile = new File("binary_test.vault");
         File decFile = new File("binary_test_dec.bin");
         
-        SecretKey sessionKey = VaultSession.getVaultSessionKey();
+        SecretKey sessionKey = VaultSession.INSTANCE.getVaultSessionKey();
         FileEncryptor encryptor = new FileEncryptor(SecurityProfile.BALANCED);
         
         System.out.println("Testing binary file with all byte values (0x00-0xFF)");
@@ -419,7 +418,7 @@ public class FileEncryptionDemo {
         HashedPassword stored = PBKDF2Hasher.defaultHashPassword(password);
         byte[] sessionKey = PBKDF2Hasher.deriveSessionKey(password, stored);
         
-        VaultSession.unlock(sessionKey);
+        VaultSession.INSTANCE.unlock(sessionKey);
         
         Arrays.fill(password, ' ');
         Arrays.fill(sessionKey, (byte) 0);
