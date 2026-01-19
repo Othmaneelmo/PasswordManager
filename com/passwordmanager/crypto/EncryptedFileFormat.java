@@ -92,11 +92,14 @@ public final class EncryptedFileFormat {
      * @param profile security profile used
      * @param iv initialization vector
      * @throws IOException if write fails
-     * @throws IllegalArgumentException if IV is too large
+     * @throws IllegalArgumentException if profile or IV is invalid
      */
     public static void writeHeader(OutputStream out, SecurityProfile profile, byte[] iv) 
             throws IOException {
         
+        if (profile == null) {
+            throw new IllegalArgumentException("Security profile cannot be null");
+        }
         if (iv == null || iv.length == 0) {
             throw new IllegalArgumentException("IV cannot be null or empty");
         }
