@@ -39,6 +39,8 @@ package "com.passwordmanager" as com.passwordmanager {
     class AbstractFeature
     class FeatureRegistry
     class FeatureMenu
+    class EncryptFileFeature
+    class DecryptFileFeature
     package "encryption" as encryption {
       class EncryptDataFeature
       class DecryptDataFeature
