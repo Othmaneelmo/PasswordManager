@@ -3,10 +3,9 @@ package com.passwordmanager.features;
 import com.passwordmanager.crypto.FileEncryptor;
 import com.passwordmanager.crypto.SecurityProfile;
 import com.passwordmanager.storage.VaultSession;
-
-import javax.crypto.SecretKey;
 import java.io.Console;
 import java.io.File;
+import javax.crypto.SecretKey;
 
 /**
  * Feature module for encrypting files via console interface.
@@ -18,8 +17,43 @@ import java.io.File;
  * - File validation
  * </p>
  */
-public class EncryptFileFeature {
-    
+public class EncryptFileFeature implements Feature {
+
+    @Override
+    public String getId() {
+        return "encrypt-file";
+    }
+
+    @Override
+    public String getDisplayName() {
+        return "Encrypt File";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Encrypt a file using authenticated encryption with configurable security profiles.";
+    }
+
+    @Override
+    public boolean requiresUnlockedVault() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
+    @Override
+    public FeatureCategory getCategory() {
+        return FeatureCategory.FILE_MANAGEMENT;
+    }
+
+    @Override
+    public int getSortOrder() {
+        return 10;
+    }
+
     /**
      * Executes the encrypt file feature.
      * <p>
@@ -34,7 +68,8 @@ public class EncryptFileFeature {
      *
      * @param console console for user interaction
      */
-    public static void execute(Console console) {
+    @Override
+    public void execute(Console console) {
         if (console == null) {
             System.out.println("ERROR: Console not available");
             return;

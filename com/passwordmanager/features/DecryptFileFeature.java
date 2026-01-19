@@ -3,10 +3,9 @@ package com.passwordmanager.features;
 import com.passwordmanager.crypto.EncryptedFileFormat;
 import com.passwordmanager.crypto.FileDecryptor;
 import com.passwordmanager.storage.VaultSession;
-
-import javax.crypto.SecretKey;
 import java.io.Console;
 import java.io.File;
+import javax.crypto.SecretKey;
 
 /**
  * Feature module for decrypting files via console interface.
@@ -18,8 +17,43 @@ import java.io.File;
  * - Error handling and user feedback
  * </p>
  */
-public class DecryptFileFeature {
-    
+public class DecryptFileFeature implements Feature {
+
+    @Override
+    public String getId() {
+        return "decrypt-file";
+    }
+
+    @Override
+    public String getDisplayName() {
+        return "Decrypt File";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Decrypt a file with authentication verification to ensure data integrity.";
+    }
+
+    @Override
+    public boolean requiresUnlockedVault() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
+    @Override
+    public FeatureCategory getCategory() {
+        return FeatureCategory.FILE_MANAGEMENT;
+    }
+
+    @Override
+    public int getSortOrder() {
+        return 20;
+    }
+
     /**
      * Executes the decrypt file feature.
      * <p>
@@ -34,7 +68,8 @@ public class DecryptFileFeature {
      *
      * @param console console for user interaction
      */
-    public static void execute(Console console) {
+    @Override
+    public void execute(Console console) {
         if (console == null) {
             System.out.println("ERROR: Console not available");
             return;

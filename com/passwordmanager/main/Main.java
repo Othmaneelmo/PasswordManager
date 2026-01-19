@@ -259,13 +259,15 @@ public class Main {
         registry.register(new EncryptDataFeature(VaultSession.INSTANCE));
         registry.register(new DecryptDataFeature(VaultSession.INSTANCE));
 
+        // File encryption features
+        registry.register(new EncryptFileFeature());
+        registry.register(new DecryptFileFeature());
+
         // System features
         registry.register(new LockVaultFeature(VaultSession.INSTANCE));
         registry.register(new ExitFeature(VaultSession.INSTANCE));
 
         // Future features can be added here:
-        // registry.register(new EncryptFileFeature(VaultSession.INSTANCE));
-        // registry.register(new DecryptFileFeature(VaultSession.INSTANCE));
         // registry.register(new HideInImageFeature(VaultSession.INSTANCE));
         // registry.register(new ManagePasswordsFeature(VaultSession.INSTANCE));
         // registry.register(new GeneratePasswordFeature());
