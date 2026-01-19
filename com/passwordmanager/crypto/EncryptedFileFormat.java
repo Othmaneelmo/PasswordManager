@@ -232,11 +232,16 @@ public final class EncryptedFileFormat {
      */
     private static byte profileToByte(SecurityProfile profile) {
         switch (profile) {
-            case FAST: return 0x00;
-            case BALANCED: return 0x01;
-            case PARANOID: return 0x02;
-            default:
-                throw new IllegalArgumentException("Unknown profile: " + profile);
+            case FAST -> {
+                return 0x00;
+            }
+            case BALANCED -> {
+                return 0x01;
+            }
+            case PARANOID -> {
+                return 0x02;
+            }
+            default -> throw new IllegalArgumentException("Unknown profile: " + profile);
         }
     }
     
@@ -245,11 +250,16 @@ public final class EncryptedFileFormat {
      */
     private static SecurityProfile byteToProfile(byte b) throws IOException {
         switch (b) {
-            case 0x00: return SecurityProfile.FAST;
-            case 0x01: return SecurityProfile.BALANCED;
-            case 0x02: return SecurityProfile.PARANOID;
-            default:
-                throw new IOException("Unknown security profile byte: 0x" + 
+            case 0x00 -> {
+                return SecurityProfile.FAST;
+            }
+            case 0x01 -> {
+                return SecurityProfile.BALANCED; 
+            }
+            case 0x02 -> {
+                return SecurityProfile.PARANOID;
+            }
+            default -> throw new IOException("Unknown security profile byte: 0x" + 
                     String.format("%02X", b));
         }
     }
