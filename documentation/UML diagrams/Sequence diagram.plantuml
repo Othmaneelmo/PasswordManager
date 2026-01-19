@@ -70,9 +70,19 @@ loop User selects features
         FeatureMenu -> VaultSession: isUnlocked()
         VaultSession --> FeatureMenu: true
         FeatureMenu -> Feature: execute(console)
-        Feature -> EncryptionProvider: encrypt(data, key)
-        EncryptionProvider --> Feature: EncryptionResult
-        Feature --> User: Encrypted data
+        alt Data encryption
+            Feature -> EncryptionProvider: encrypt(data, key)
+            EncryptionProvider --> Feature: EncryptionResult
+            Feature --> User: Encrypted data
+        else File encryption
+            Feature -> FileEncryptor: encryptFile(file, outputFile, key)
+            FileEncryptor --> Feature: success
+            Feature --> User: Encrypted file
+        else File decryption
+            Feature -> FileDecryptor: decryptFile(inputFile, outputFile, key)
+            FileDecryptor --> Feature: success
+            Feature --> User: Decrypted file
+        end
     else Feature does not require vault
         FeatureMenu -> Feature: execute(console)
         Feature --> User: Result
