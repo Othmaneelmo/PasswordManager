@@ -1,12 +1,12 @@
 package com.passwordmanager.crypto;
 
+import java.io.*;
+import java.security.GeneralSecurityException;
+import java.util.Arrays;
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
-import java.io.*;
-import java.security.GeneralSecurityException;
-import java.util.Arrays;
 
 /**
  * Streaming file decryption with authentication verification.
@@ -97,20 +97,25 @@ public final class FileDecryptor {
             
             return true;
             
-        } catch (javax.crypto.AEADBadTagException e) {
-            // Authentication failed - file tampered or wrong key
-            throw new GeneralSecurityException(
-                "Authentication failed - file may be corrupted, tampered, or wrong key used",
-                e
-            );
-            
-        } catch (Exception e) {
-            // Cleanup temp file on any failure
+        } catch (IOException e) {
+            if (tempFile.exists()) {
+                tempFile.delete();
+            }
+        
+            Throwable cause = e.getCause();
+            if (cause instanceof javax.crypto.AEADBadTagException) {
+                throw new GeneralSecurityException(
+                    "Authentication failed - file may be corrupted, tampered, or wrong key used",
+                    cause
+                );
+            }
+        
+            throw e;
+        } catch (RuntimeException | GeneralSecurityException e) {
             if (tempFile.exists()) {
                 tempFile.delete();
             }
             throw e;
-            
         } finally {
             // Cleanup sensitive material
             if (metadata != null) {
@@ -237,17 +242,20 @@ public final class FileDecryptor {
             
             return true;
             
-        } catch (javax.crypto.AEADBadTagException e) {
-            throw new GeneralSecurityException(
-                "Authentication failed - wrong key or corrupted file", e
-            );
-            
-        } catch (Exception e) {
+        }catch (IOException e) {
             if (tempFile.exists()) {
                 tempFile.delete();
             }
+        
+            Throwable cause = e.getCause();
+            if (cause instanceof javax.crypto.AEADBadTagException) {
+                throw new GeneralSecurityException(
+                    "Authentication failed - file may be corrupted, tampered, or wrong key used",
+                    cause
+                );
+            }
+        
             throw e;
-            
         } finally {
             if (metadata != null) {
                 metadata.zeroize();
