@@ -87,6 +87,28 @@ class DecryptDataFeature {
   +getCategory(): FeatureCategory
 }
 
+class EncryptFileFeature implements Feature {
+  +getId(): String
+  +getDisplayName(): String
+  +getDescription(): String
+  +requiresUnlockedVault(): boolean
+  +isEnabled(): boolean
+  +getCategory(): FeatureCategory
+  +getSortOrder(): int
+  +execute(console: Console): void
+}
+
+class DecryptFileFeature implements Feature {
+  +getId(): String
+  +getDisplayName(): String
+  +getDescription(): String
+  +requiresUnlockedVault(): boolean
+  +isEnabled(): boolean
+  +getCategory(): FeatureCategory
+  +getSortOrder(): int
+  +execute(console: Console): void
+}
+
 class LockVaultFeature {
   +LockVaultFeature(vaultSession: VaultSession)
   +getId(): String
@@ -187,7 +209,28 @@ class SecurityProfile {
   +getEncryptionProvider(): EncryptionProvider
 }
 
+class FileEncryptor {
+  +encryptFile(file: File, outputFile: File, key: SecretKey): void
+  +encryptFileWithProgress(file: File, outputFile: File, key: SecretKey, callback: ProgressCallback): boolean
+}
+
+class FileDecryptor {
+  +decryptFile(inputFile: File, outputFile: File, sessionKey: SecretKey): boolean
+  +decryptFileWithProgress(inputFile: File, outputFile: File, sessionKey: SecretKey, callback: ProgressCallback): boolean
+  +verifyFile(inputFile: File, sessionKey: SecretKey): boolean
+}
+
+class EncryptedFileFormat {
+  +isEncryptedFile(file: File): boolean
+  +readHeader(in: InputStream): FileMetadata
+  +writeHeader(out: OutputStream, profile: SecurityProfile, iv: byte[]): void
+}
+
 class CryptoDemo {
+  +main(args: String[]): void
+}
+
+class FileEncryptionDemo {
   +main(args: String[]): void
 }
 
@@ -215,6 +258,9 @@ EncryptDataFeature --> AbstractFeature : extends
 DecryptDataFeature --> AbstractFeature : extends
 LockVaultFeature --> AbstractFeature : extends
 ExitFeature --> AbstractFeature : extends
+
+EncryptFileFeature --> Feature : implements
+DecryptFileFeature --> Feature : implements
 
 FeatureMenu --> FeatureRegistry : uses
 FeatureMenu --> Feature : executes
