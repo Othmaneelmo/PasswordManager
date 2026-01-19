@@ -58,6 +58,8 @@ component "Feature System" as Features {
   component "AbstractFeature" as Abstract
   component "EncryptDataFeature" as Encrypt
   component "DecryptDataFeature" as Decrypt
+  component "EncryptFileFeature" as EncryptFile
+  component "DecryptFileFeature" as DecryptFile
   component "LockVaultFeature" as Lock
   component "ExitFeature" as Exit
   note right
